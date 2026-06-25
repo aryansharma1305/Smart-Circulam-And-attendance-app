@@ -1,94 +1,87 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../services/notification_service.dart';
 
-// Provider for the notification service
-final notificationServiceProvider = Provider<NotificationService>((ref) {
-  return NotificationService();
-});
+import '../models/announcement.dart';
+import '../models/in_app_notification.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/announcement_controller.dart';
+import '../providers/repository_providers.dart';
 
-// Provider for announcements
-final announcementsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-      final notificationService = ref.watch(notificationServiceProvider);
-      return await notificationService.getAnnouncements();
-    });
+// ---------------------------------------------------------------------------
+// Notification / Announcement Providers
+// ---------------------------------------------------------------------------
+//
+// These providers replace the previous Firebase-dependent implementations
+// (which imported firebase_auth and notification_service.dart).
+// All data now flows through [AnnouncementRepository].
+//
+// The provider names are kept backward-compatible where possible.
 
-// Provider for unread announcements count
-final unreadAnnouncementsCountProvider = FutureProvider.autoDispose<int>((
-  ref,
-) async {
-  final announcements = await ref.watch(announcementsProvider.future);
-  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+/// All announcements for the currently signed-in user.
+///
+/// Replaces the old [announcementsProvider] (which returned raw Maps).
+/// Consumers that previously read `Map<String, dynamic>` may need to be
+/// updated to use the typed [Announcement] model.
+final announcementsProvider = announcementControllerProvider;
 
-  if (currentUserId == null) {
-    return 0;
-  }
+/// Number of unread announcements for the current user.
+final unreadAnnouncementsCountProvider = unreadAnnouncementCountProvider;
 
-  return announcements.where((announcement) {
-    final List<dynamic> readBy = announcement['readBy'] ?? [];
-    return !readBy.contains(currentUserId);
-  }).length;
-});
-
-// Provider for creating a new announcement
+/// Creates a new announcement.
+///
+/// Pass an [Announcement] value; the repository will assign an ID.
 final createAnnouncementProvider = FutureProvider.family
-    .autoDispose<String, Map<String, dynamic>>((ref, announcementData) async {
-      final notificationService = ref.watch(notificationServiceProvider);
-
-      final title = announcementData['title'] as String;
-      final body = announcementData['body'] as String;
-      final targetUserIds = List<String>.from(
-        announcementData['targetUserIds'] as List,
-      );
-      final senderName = announcementData['senderName'] as String;
-      final courseId = announcementData['courseId'] as String?;
-      final courseName = announcementData['courseName'] as String?;
-
-      final announcementId = await notificationService
-          .createAnnouncementNotification(
-            title: title,
-            body: body,
-            targetUserIds: targetUserIds,
-            senderName: senderName,
-            courseId: courseId,
-            courseName: courseName,
-          );
-
-      // Show a local notification
-      await notificationService.showLocalNotification(title: title, body: body);
-
+    .autoDispose<Announcement, Announcement>((ref, announcement) async {
+      final repo = ref.watch(announcementRepositoryProvider);
+      final saved = await repo.createAnnouncement(announcement);
       ref.invalidate(announcementsProvider);
-      ref.invalidate(unreadAnnouncementsCountProvider);
-
-      return announcementId;
+      return saved;
     });
 
-// Provider for marking an announcement as read
+/// Marks a single announcement as read by [announcementId] (the current user).
 final markAnnouncementAsReadProvider = FutureProvider.family
     .autoDispose<void, String>((ref, announcementId) async {
-      final notificationService = ref.watch(notificationServiceProvider);
-      await notificationService.markAnnouncementAsRead(announcementId);
-
-      // Invalidate the announcements provider to refresh the list
-      ref.invalidate(announcementsProvider);
-      ref.invalidate(unreadAnnouncementsCountProvider);
+      final controller = ref.read(announcementControllerProvider.notifier);
+      await controller.markRead(announcementId);
     });
 
-// Provider for scheduling class notifications
-final scheduleClassNotificationProvider = FutureProvider.family
-    .autoDispose<void, Map<String, dynamic>>((ref, notificationData) async {
-      final notificationService = ref.watch(notificationServiceProvider);
+final inAppNotificationsProvider =
+    FutureProvider.autoDispose<List<InAppNotification>>((ref) async {
+      final user = ref.watch(currentUserProvider);
+      if (user == null) return const [];
 
-      final title = notificationData['title'] as String;
-      final body = notificationData['body'] as String;
-      final scheduledTime = notificationData['scheduledTime'] as DateTime;
-      final id = notificationData['id'] as int? ?? 0;
-
-      await notificationService.scheduleClassNotification(
-        title: title,
-        body: body,
-        scheduledTime: scheduledTime,
-        id: id,
-      );
+      final repo = ref.watch(notificationRepositoryProvider);
+      return repo.getInbox(user.uid);
     });
+
+final unreadInAppNotificationsCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return 0;
+
+  final repo = ref.watch(notificationRepositoryProvider);
+  return repo.getUnreadCount(user.uid);
+});
+
+final markInAppNotificationReadProvider = FutureProvider.family
+    .autoDispose<void, String>((ref, notificationId) async {
+      final user = ref.watch(currentUserProvider);
+      if (user == null) return;
+
+      final repo = ref.watch(notificationRepositoryProvider);
+      await repo.markRead(notificationId, user.uid);
+      ref.invalidate(inAppNotificationsProvider);
+      ref.invalidate(unreadInAppNotificationsCountProvider);
+    });
+
+final markAllInAppNotificationsReadProvider = FutureProvider.autoDispose<void>((
+  ref,
+) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return;
+
+  final repo = ref.watch(notificationRepositoryProvider);
+  await repo.markAllRead(user.uid);
+  ref.invalidate(inAppNotificationsProvider);
+  ref.invalidate(unreadInAppNotificationsCountProvider);
+});

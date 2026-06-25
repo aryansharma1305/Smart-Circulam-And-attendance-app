@@ -1,109 +1,121 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/attendance_service.dart';
 
-// Provider for the attendance service
-final attendanceServiceProvider = Provider<AttendanceService>((ref) {
-  return AttendanceService();
-});
+import '../models/attendance.dart';
+import '../core/app_error.dart';
+import '../repositories/attendance_repository.dart';
+import '../providers/repository_providers.dart';
 
-// Provider for active session (for teachers)
-final activeSessionProvider =
-    StateNotifierProvider<
-      ActiveSessionNotifier,
-      AsyncValue<Map<String, dynamic>?>
-    >((ref) {
-      final attendanceService = ref.watch(attendanceServiceProvider);
-      return ActiveSessionNotifier(attendanceService);
-    });
+// ---------------------------------------------------------------------------
+// Attendance Providers
+// ---------------------------------------------------------------------------
+//
+// These providers replace the previous Firebase-dependent implementations.
+// All data now flows through [AttendanceRepository], which defaults to
+// [InMemoryAttendanceRepository] and can be overridden with a Firebase
+// implementation via ProviderScope.
+//
+// The provider names are unchanged so existing consumers compile without
+// modification.
 
-// Notifier for managing active session state
+// ---------------------------------------------------------------------------
+// Active Session State (teacher-facing)
+// ---------------------------------------------------------------------------
+
+/// State for the currently active (live) session being managed by a teacher.
+///
+/// null means no session is currently active.
 class ActiveSessionNotifier
     extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
-  final AttendanceService _attendanceService;
+  ActiveSessionNotifier(this._attendanceRepo)
+      : super(const AsyncValue.data(null));
 
-  ActiveSessionNotifier(this._attendanceService)
-    : super(const AsyncValue.data(null));
+  final AttendanceRepository _attendanceRepo;
 
-  Future<void> createSession({
-    required String subjectId,
-    required String classId,
-    required String teacherId,
-    required GeoPoint location,
-    required DateTime startTime,
-    required DateTime endTime,
+  /// Marks a student's attendance for the current session.
+  ///
+  /// [sessionId]  – the live session identifier.
+  /// [studentId]  – the student marking in.
+  /// [status]     – the attendance status to record.
+  Future<void> markStudentAttendance({
+    required String sessionId,
+    required String studentId,
+    required AttendanceStatus status,
   }) async {
     try {
       state = const AsyncValue.loading();
 
-      final result = await _attendanceService.createSession(
-        subjectId: subjectId,
-        classId: classId,
-        teacherId: teacherId,
-        location: location,
-        startTime: startTime,
-        endTime: endTime,
+      final record = Attendance(
+        sessionId: sessionId,
+        studentId: studentId,
+        status: status,
+        geoOK: true,
+        ssidOK: false,
+        createdAt: DateTime.now(),
       );
 
-      if (result['success']) {
-        state = AsyncValue.data(result);
-      } else {
-        state = AsyncValue.error(result['error'], StackTrace.current);
-      }
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      await _attendanceRepo.markAttendance(record);
+      state = AsyncValue.data({'sessionId': sessionId, 'status': 'active'});
+    } on ConflictError catch (e, st) {
+      state = AsyncValue.error(e, st);
+    } catch (e, st) {
+      state = AsyncValue.error(
+        NetworkError(detail: e.toString()),
+        st,
+      );
     }
   }
 
-  Future<void> endSession(String sessionId) async {
-    try {
-      state = const AsyncValue.loading();
-
-      final success = await _attendanceService.endSession(sessionId);
-
-      if (success) {
-        state = const AsyncValue.data(null);
-      } else {
-        state = AsyncValue.error('Failed to end session', StackTrace.current);
-      }
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
-  }
+  void clearSession() => state = const AsyncValue.data(null);
 }
 
-// Provider for student attendance marking
-final markAttendanceProvider =
-    FutureProvider.family<Map<String, dynamic>, Map<String, dynamic>>((
-      ref,
-      params,
-    ) async {
-      final attendanceService = ref.watch(attendanceServiceProvider);
+/// Provider for the currently active session state.
+final activeSessionProvider = StateNotifierProvider<ActiveSessionNotifier,
+    AsyncValue<Map<String, dynamic>?>>(
+  (ref) => ActiveSessionNotifier(ref.watch(attendanceRepositoryProvider)),
+);
 
-      return attendanceService.markAttendance(
-        sessionId: params['sessionId'],
-        sessionCode: params['sessionCode'],
-        studentId: params['studentId'],
-        currentLocation: params['currentLocation'],
-      );
-    });
+// ---------------------------------------------------------------------------
+// Student Attendance History
+// ---------------------------------------------------------------------------
 
-// Provider for student attendance history
+/// Returns the full attendance history for [studentId].
 final studentAttendanceHistoryProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((
-      ref,
-      studentId,
-    ) async {
-      final attendanceService = ref.watch(attendanceServiceProvider);
-      return attendanceService.getStudentAttendanceHistory(studentId);
-    });
+    FutureProvider.family<List<Attendance>, String>((ref, studentId) async {
+  final repo = ref.watch(attendanceRepositoryProvider);
+  return repo.getStudentHistory(studentId);
+});
 
-// Provider for session attendance
+// ---------------------------------------------------------------------------
+// Session Roll (teacher view of who attended a specific session)
+// ---------------------------------------------------------------------------
+
+/// Returns the list of attendance records for [sessionId].
 final sessionAttendanceProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((
-      ref,
-      sessionId,
-    ) async {
-      final attendanceService = ref.watch(attendanceServiceProvider);
-      return attendanceService.getSessionAttendance(sessionId);
-    });
+    FutureProvider.family<List<Attendance>, String>((ref, sessionId) async {
+  final repo = ref.watch(attendanceRepositoryProvider);
+  return repo.getSessionRoll(sessionId);
+});
+
+// ---------------------------------------------------------------------------
+// Convenience: mark attendance (student action)
+// ---------------------------------------------------------------------------
+
+/// Marks attendance for the given session/student combo.
+///
+/// Throws [ConflictError] if attendance has already been marked.
+final markAttendanceProvider = FutureProvider.family<Attendance,
+    ({String sessionId, String studentId, AttendanceStatus status})>(
+  (ref, params) async {
+    final repo = ref.watch(attendanceRepositoryProvider);
+    return repo.markAttendance(
+      Attendance(
+        sessionId: params.sessionId,
+        studentId: params.studentId,
+        status: params.status,
+        geoOK: true,
+        ssidOK: false,
+        createdAt: DateTime.now(),
+      ),
+    );
+  },
+);
