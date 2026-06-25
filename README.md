@@ -1,305 +1,251 @@
-# 📚 Smart Attendance Management System
+# Smart Circulam and Attendance App
 
-A comprehensive Flutter-based attendance management system designed for educational institutions, featuring role-based access, QR code attendance, analytics, and multi-modal attendance tracking.
+A Flutter + Firebase attendance management app for educational institutions.
+The project focuses on role-based attendance workflows, secure QR attendance,
+academic administration, exception review, announcements, and student-facing
+notifications.
 
-## 🚀 Features
+The app is currently in active development. Local/demo flows work without
+Firebase through in-memory repositories, while Firebase-backed dev and staging
+environments are partially configured.
 
-### 👥 Multi-Role Support
-- **Students**: QR scanning, attendance history, exception requests
-- **Teachers**: Session management, analytics, roster management
-- **Administrators**: User management, system oversight, reports
-- **Counsellors**: Student support, attendance monitoring
+## Current status
 
-### 📱 Core Functionality
+- Flutter app architecture has been moved toward repository-driven state.
+- Firebase dev and staging project configuration has been generated.
+- Firestore rules and indexes are deployed to dev and staging.
+- Cloud Functions source compiles locally, but deployment requires Firebase
+  Blaze billing.
+- Firebase Storage rules are present locally, but Storage must be initialized in
+  the Firebase Console before deployment.
+- Production Firebase configuration is intentionally not completed yet.
 
-#### 🎯 QR Code Attendance System
-- **Dynamic QR Generation**: Teachers generate rotating QR codes every 30 seconds
-- **Secure Scanning**: Students scan live QR codes for attendance
-- **Location Verification**: GPS-based attendance validation
-- **Multi-Modal Options**: QR, NFC, Bluetooth, and manual attendance
+See [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md) for the phase-by-phase plan and
+deployment status.
 
-#### 📊 Analytics & Reporting
-- Real-time attendance analytics
-- Student performance tracking
-- Attendance trend analysis
-- CSV export functionality
-- Risk assessment for at-risk students
+## Features
 
-#### 🔐 Security Features
-- Role-based authentication
-- Location-based attendance validation
-- WiFi network verification
-- QR code rotation for security
-- Session-based attendance tracking
+### Roles
 
-## 🏗️ Architecture
+- Student: attendance history, QR attendance, exception requests, notifications.
+- Teacher: schedule, sessions, live attendance, announcements, exception review.
+- Admin: user management, academic catalog setup, audit visibility, compliance.
+- Counselor/parent-oriented models are present for future expansion.
 
-### 📁 Project Structure
-```
-management_app/
+### Attendance
+
+- Session-based attendance records.
+- QR attendance token model with signed payload support.
+- Duplicate attendance prevention.
+- Student enrollment validation path for secure QR submission.
+- Attendance exception requests for legitimate corrections.
+
+### Academics
+
+- Departments, terms, subjects, sections, rooms, teaching assignments, and
+  timetable foundations.
+- Admin-facing academic management screen.
+- Firebase and in-memory repository implementations.
+
+### Security and compliance
+
+- Role and institution scoping through Firebase custom claims.
+- Firestore rules for users, sessions, attendance, exceptions, announcements,
+  notifications, audit logs, and academic catalog data.
+- Cloud Function source for transactional attendance exception approval.
+- Audit events for sensitive backend actions.
+- Protected Storage rules for exception evidence and announcement attachments.
+
+### Notifications
+
+- In-app notification model and repository.
+- Firebase and in-memory inbox implementations.
+- Student notification screen backed by repository data.
+- FCM is not wired yet; the roadmap keeps push delivery as a future production
+  hardening step.
+
+## Tech stack
+
+- Flutter / Dart
+- Riverpod
+- GoRouter
+- Firebase Auth
+- Cloud Firestore
+- Cloud Functions for Firebase
+- Firebase Storage
+- Firebase App Check
+- Firebase Crashlytics
+- Jest + Firebase Rules Unit Testing for Firestore rules
+
+## Repository structure
+
+```text
+.
 ├── lib/
-│   ├── core/                 # Core functionality
-│   │   ├── router.dart       # App navigation
-│   │   └── constants.dart    # App constants
-│   ├── models/              # Data models
-│   │   ├── user.dart
-│   │   ├── attendance_record.dart
-│   │   └── session.dart
-│   ├── services/            # Business logic
-│   │   ├── firebase_service.dart
-│   │   ├── analytics_service.dart
-│   │   ├── qr_service.dart
-│   │   └── location_security_service.dart
-│   ├── providers/           # State management
-│   │   └── auth_provider.dart
-│   ├── screens/            # UI screens
-│   │   ├── student/
-│   │   ├── teacher/
-│   │   ├── admin/
-│   │   └── counsellor/
-│   └── widgets/            # Reusable components
-└── README.md
+│   ├── controllers/          # Riverpod state controllers
+│   ├── core/                 # Routing, environment, guards, common state
+│   ├── models/               # Domain models
+│   ├── providers/            # Repository/provider wiring
+│   ├── repositories/         # Contracts plus Firebase/in-memory implementations
+│   ├── screens/              # Admin, auth, student, teacher, common UI
+│   ├── services/             # QR, secure attendance, storage/demo helpers
+│   └── widgets/              # Reusable Flutter widgets
+├── functions/
+│   ├── src/                  # Callable/backend Firebase Functions
+│   └── tests/                # Firestore rules tests
+├── test/                     # Dart unit/widget tests
+├── firestore.rules
+├── firestore.indexes.json
+├── storage.rules
+├── firebase.json
+└── PROJECT_ROADMAP.md
 ```
 
-### 🔧 Tech Stack
-- **Framework**: Flutter 3.35.2
-- **State Management**: Riverpod
-- **Navigation**: GoRouter
-- **Backend**: Firebase (Firestore, Auth)
-- **Local Storage**: SharedPreferences
-- **QR Generation**: QR Flutter
-- **Location**: Geolocator
-- **Charts**: FL Chart
-
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
-- Flutter SDK 3.35.2 or higher
-- Dart SDK 3.0.0 or higher
-- Android Studio / VS Code
-- Firebase project setup
 
-### Installation
+- Flutter SDK installed.
+- Node.js and npm for Firebase Functions.
+- Firebase CLI for emulator/rules deployment.
+- FlutterFire CLI if regenerating Firebase options.
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd management_app
-   ```
+### Install dependencies
 
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Firebase Setup**
-   - Create a Firebase project
-   - Add Android/iOS apps to Firebase
-   - Download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)
-   - Place configuration files in respective platform folders
-
-4. **Run the app**
-   ```bash
-   flutter run
-   ```
-
-## 📱 User Flows
-
-### 👨‍🎓 Student Flow
-1. **Login** → Select Student role
-2. **Dashboard** → View attendance summary
-3. **Scan QR** → Mark attendance for active sessions
-4. **History** → View attendance records
-5. **Exceptions** → Request attendance corrections
-
-### 👨‍🏫 Teacher Flow
-1. **Login** → Select Teacher role
-2. **Dashboard** → View class schedule
-3. **Start Session** → Generate dynamic QR codes
-4. **Monitor** → Track real-time attendance
-5. **Analytics** → View attendance reports
-6. **Manage** → Handle attendance exceptions
-
-### 👨‍💼 Admin Flow
-1. **Login** → Select Admin role
-2. **Dashboard** → System overview
-3. **Users** → Manage teachers and students
-4. **Reports** → Generate system-wide analytics
-5. **Settings** → Configure system parameters
-
-## 🎯 Key Features Deep Dive
-
-### 🔄 Dynamic QR Code System
-
-The teacher-side QR generation includes:
-
-```dart
-String _generateQRCode() {
-  final random = Random();
-  final timestamp = DateTime.now().millisecondsSinceEpoch;
-  final sessionId = widget.classData['subject']?.replaceAll(' ', '_') ?? 'session';
-  final randomCode = random.nextInt(999999).toString().padLeft(6, '0');
-  
-  return '${sessionId}_${timestamp}_$randomCode';
-}
-```
-
-**Features:**
-- ✅ Rotates every 30 seconds
-- ✅ Includes timestamp and session info
-- ✅ Visual rotation indicator
-- ✅ Prevents screenshot abuse
-- ✅ Secure random components
-
-### 📍 Location-Based Validation
-
-```dart
-static Future<LocationValidationResult> validateLocation({
-  required double targetLatitude,
-  required double targetLongitude,
-  required double allowedRadius,
-}) async {
-  final currentLocation = await getCurrentLocation();
-  final distance = calculateDistance(/*...*/);
-  return LocationValidationResult(isValid: distance <= allowedRadius);
-}
-```
-
-### 📊 Analytics Engine
-
-- **Real-time Metrics**: Live attendance tracking
-- **Trend Analysis**: Historical attendance patterns
-- **Risk Assessment**: Identify at-risk students
-- **Export Options**: CSV reports for external analysis
-
-## 🔧 Configuration
-
-### Environment Setup
-Create `.env` file in project root:
-```env
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_API_KEY=your_api_key
-DEFAULT_LOCATION_RADIUS=50.0
-QR_ROTATION_INTERVAL=30
-```
-
-### Firebase Rules
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /sessions/{sessionId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
-```
-
-## 🧪 Testing
-
-### Run Tests
 ```bash
-# Unit tests
+flutter pub get
+npm --prefix functions install
+```
+
+### Run locally without Firebase
+
+By default, the app can run with in-memory repositories:
+
+```bash
+flutter run
+```
+
+### Run with Firebase
+
+Use the environment flags defined in `lib/core/env.dart`.
+
+Examples:
+
+```bash
+flutter run --dart-define=APP_ENV=dev --dart-define=USE_FIREBASE=true
+flutter run --dart-define=APP_ENV=staging --dart-define=USE_FIREBASE=true
+```
+
+For local emulators:
+
+```bash
+firebase emulators:start
+flutter run \
+  --dart-define=APP_ENV=dev \
+  --dart-define=USE_FIREBASE=true \
+  --dart-define=USE_EMULATOR=true
+```
+
+## Firebase projects
+
+Configured aliases:
+
+- `dev`: `smart-circulam-dev`
+- `staging`: `smart-circulam-staging`
+
+Production configuration is not active yet because the originally requested
+project ID was unavailable/quota-limited during setup.
+
+## Useful commands
+
+### Flutter
+
+```bash
+flutter analyze --no-fatal-infos --no-fatal-warnings
 flutter test
-
-# Integration tests
-flutter test integration_test/
-
-# Widget tests
-flutter test test/widget_test.dart
 ```
 
-### Demo Mode
-The app includes demo services for testing without Firebase:
-- `FirebaseAttendanceServiceDemo`
-- `SimpleStorageService`
-- Mock location and QR services
+Focused tests used during development:
 
-## 📦 Build & Deploy
-
-### Android APK
 ```bash
-flutter build apk --release
+flutter test \
+  test/services/secure_qr_service_test.dart \
+  test/services/attendance_qr_submission_service_test.dart \
+  test/repositories/in_memory_attendance_test.dart \
+  test/repositories/in_memory_notification_repository_test.dart \
+  test/widget_test.dart
 ```
 
-### iOS IPA
+### Firebase Functions
+
 ```bash
-flutter build ios --release
+npm --prefix functions run build
 ```
 
-### Web Build
+### Firestore rules tests
+
 ```bash
-flutter build web --release
+firebase emulators:exec --only firestore \
+  "npm --prefix functions test -- --runInBand" \
+  --project smart-app-test
 ```
 
-## 🔍 Troubleshooting
+### Deploy Firestore rules and indexes
 
-### Common Issues
-
-1. **Firebase Connection Issues**
-   - Verify `google-services.json` placement
-   - Check Firebase project configuration
-   - Ensure internet connectivity
-
-2. **Location Permission Denied**
-   - Add location permissions to `AndroidManifest.xml`
-   - Request runtime permissions
-   - Check device location settings
-
-3. **QR Scanner Not Working**
-   - Verify camera permissions
-   - Check device camera functionality
-   - Ensure adequate lighting
-
-### Debug Commands
 ```bash
-# Check Flutter doctor
-flutter doctor
-
-# Clean build
-flutter clean && flutter pub get
-
-# Verbose logging
-flutter run --verbose
+firebase deploy --only firestore:rules,firestore:indexes --project smart-circulam-dev
+firebase deploy --only firestore:rules,firestore:indexes --project smart-circulam-staging
 ```
 
-## 🤝 Contributing
+### Deploy Storage rules
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+Storage must first be initialized in the Firebase Console for each project.
 
-### Code Style
-- Follow Dart/Flutter conventions
-- Use meaningful variable names
-- Add comments for complex logic
-- Write tests for new features
+```bash
+firebase deploy --only storage --project smart-circulam-dev
+firebase deploy --only storage --project smart-circulam-staging
+```
 
-## 📄 License
+### Deploy Functions
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Cloud Functions deployment requires Firebase Blaze billing:
 
-## 🙏 Acknowledgments
+```bash
+firebase deploy --only functions --project smart-circulam-dev
+firebase deploy --only functions --project smart-circulam-staging
+```
 
-- Flutter team for the amazing framework
-- Firebase for backend services
-- QR Flutter package contributors
-- Open source community
+## Cost and deployment notes
 
-## 📞 Support
+- Firestore has a no-cost quota and is already usable for dev/staging.
+- Cloud Functions require Blaze, although low development usage can remain
+  within Firebase's no-cost quota.
+- Firebase Storage also requires project Storage initialization before rules can
+  be deployed.
+- Use Firebase budget alerts if enabling Blaze.
 
-For support and questions:
-- Create an issue on GitHub
-- Check existing documentation
-- Review troubleshooting guide
+## Roadmap
 
----
+The active implementation plan is maintained in
+[PROJECT_ROADMAP.md](PROJECT_ROADMAP.md). Completed local foundations include:
 
-**Built with ❤️ using Flutter**
+1. Repository architecture and testable in-memory implementations.
+2. Firebase project setup for dev/staging.
+3. Firestore rules, indexes, Functions source, and emulator tests.
+4. Academic catalog management foundation.
+5. Secure QR attendance foundation.
+6. Exception review, audit, announcements, and in-app notifications foundation.
 
-*Smart Attendance Management System - Making attendance tracking simple, secure, and efficient.*
+Next planned area: reports and compliance.
+
+## Contributing
+
+1. Create a feature branch.
+2. Keep commits small and meaningful.
+3. Run relevant Flutter tests and Firebase rules tests.
+4. Update the roadmap/docs when changing architecture or deployment status.
+5. Open a pull request for review.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
