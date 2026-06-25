@@ -3,7 +3,7 @@ import '../../core/theme.dart';
 
 class LiveboardPage extends StatelessWidget {
   final String sessionId;
-  
+
   const LiveboardPage({super.key, required this.sessionId});
 
   @override
@@ -14,9 +14,7 @@ class LiveboardPage extends StatelessWidget {
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
       ),
-      body: const Center(
-        child: Text('LiveBoard Coming Soon'),
-      ),
+      body: const Center(child: Text('LiveBoard Coming Soon')),
     );
   }
 }

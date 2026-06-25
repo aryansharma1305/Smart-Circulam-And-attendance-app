@@ -72,18 +72,14 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildGoalsTab(),
-          _buildPlannerTab(),
-          _buildProgressTab(),
-        ],
+        children: [_buildGoalsTab(), _buildPlannerTab(), _buildProgressTab()],
       ),
     );
   }
 
   Widget _buildGoalsTab() {
     final goals = _getFilteredGoals();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -92,7 +88,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
           // Filters
           _buildFilters(),
           const SizedBox(height: 20),
-          
+
           // Goals List
           if (goals.isEmpty)
             _buildEmptyGoalsState()
@@ -141,10 +137,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
                     ),
                   ),
                   items: _filters.map((filter) {
-                    return DropdownMenuItem(
-                      value: filter,
-                      child: Text(filter),
-                    );
+                    return DropdownMenuItem(value: filter, child: Text(filter));
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
@@ -239,7 +232,10 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -252,191 +248,213 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
   }
 
   Widget _buildGoalCard(Goal goal) {
-    final isOverdue = goal.targetDate.isBefore(DateTime.now()) && goal.status != GoalStatus.completed;
+    final isOverdue =
+        goal.targetDate.isBefore(DateTime.now()) &&
+        goal.status != GoalStatus.completed;
     final daysLeft = goal.targetDate.difference(DateTime.now()).inDays;
-    
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: isOverdue ? Border.all(color: AppTheme.absentColor.withOpacity(0.3), width: 1) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  goal.title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimaryColor,
-                  ),
-                ),
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
+            ],
+            border: isOverdue
+                ? Border.all(
+                    color: AppTheme.absentColor.withOpacity(0.3),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getGoalTypeColor(goal.type).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  Expanded(
                     child: Text(
-                      goal.typeDisplayName,
+                      goal.title,
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _getGoalTypeColor(goal.type),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimaryColor,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getGoalPriorityColor(goal.priority).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      goal.priorityDisplayName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _getGoalPriorityColor(goal.priority),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getGoalTypeColor(goal.type).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          goal.typeDisplayName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _getGoalTypeColor(goal.type),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getGoalPriorityColor(
+                            goal.priority,
+                          ).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          goal.priorityDisplayName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _getGoalPriorityColor(goal.priority),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          
-          // Description
-          Text(
-            goal.description,
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textSecondaryColor,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          // Progress Section
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(height: 12),
+
+              // Description
+              Text(
+                goal.description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textSecondaryColor,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Progress Section
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Progress',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimaryColor,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Progress',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimaryColor,
+                              ),
+                            ),
+                            Text(
+                              '${goal.progress}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textPrimaryColor,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${goal.progress}%',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimaryColor,
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: goal.progressDecimal,
+                          backgroundColor: Colors.grey[200],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getGoalTypeColor(goal.type),
                           ),
+                          minHeight: 6,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: goal.progressDecimal,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _getGoalTypeColor(goal.type),
-                      ),
-                      minHeight: 6,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // Footer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: AppTheme.textHintColor,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    isOverdue 
-                        ? 'Overdue by ${-daysLeft} days'
-                        : daysLeft > 0 
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Footer
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: AppTheme.textHintColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isOverdue
+                            ? 'Overdue by ${-daysLeft} days'
+                            : daysLeft > 0
                             ? '$daysLeft days left'
                             : 'Due today',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isOverdue ? AppTheme.absentColor : AppTheme.textHintColor,
-                      fontWeight: isOverdue ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isOverdue
+                              ? AppTheme.absentColor
+                              : AppTheme.textHintColor,
+                          fontWeight: isOverdue
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => _editGoal(goal),
-                    icon: Icon(
-                      Icons.edit,
-                      color: AppTheme.primaryColor,
-                      size: 20,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => _deleteGoal(goal),
-                    icon: Icon(
-                      Icons.delete,
-                      color: AppTheme.absentColor,
-                      size: 20,
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => _editGoal(goal),
+                        icon: Icon(
+                          Icons.edit,
+                          color: AppTheme.primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => _deleteGoal(goal),
+                        icon: Icon(
+                          Icons.delete,
+                          color: AppTheme.absentColor,
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildPlannerTab() {
     final weeklyPlan = _getWeeklyPlan();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -445,9 +463,11 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
           // Week Overview
           _buildWeekOverview(weeklyPlan),
           const SizedBox(height: 24),
-          
+
           // Daily Plans
-          ...(weeklyPlan['days'] as List).map((day) => _buildDayPlan(day)).toList(),
+          ...(weeklyPlan['days'] as List)
+              .map((day) => _buildDayPlan(day))
+              .toList(),
         ],
       ),
     );
@@ -455,64 +475,67 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildWeekOverview(Map<String, dynamic> weeklyPlan) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'This Week\'s Plan',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildWeekStat(
-                  'Goals',
-                  weeklyPlan['totalGoals'].toString(),
-                  Icons.flag,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildWeekStat(
-                  'Tasks',
-                  weeklyPlan['totalTasks'].toString(),
-                  Icons.task,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildWeekStat(
-                  'Completed',
-                  weeklyPlan['completedTasks'].toString(),
-                  Icons.check_circle,
-                ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This Week\'s Plan',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildWeekStat(
+                      'Goals',
+                      weeklyPlan['totalGoals'].toString(),
+                      Icons.flag,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildWeekStat(
+                      'Tasks',
+                      weeklyPlan['totalTasks'].toString(),
+                      Icons.task,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildWeekStat(
+                      'Completed',
+                      weeklyPlan['completedTasks'].toString(),
+                      Icons.check_circle,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildWeekStat(String label, String value, IconData icon) {
@@ -548,99 +571,119 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildDayPlan(Map<String, dynamic> day) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                day['dayName'],
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimaryColor,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: day['isToday'] ? AppTheme.primaryColor.withOpacity(0.1) : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  day['isToday'] ? 'Today' : day['date'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: day['isToday'] ? AppTheme.primaryColor : AppTheme.textSecondaryColor,
-                  ),
-                ),
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          
-          // Classes
-          if (day['classes'].isNotEmpty) ...[
-            Text(
-              'Classes',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimaryColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    day['dayName'],
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimaryColor,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: day['isToday']
+                          ? AppTheme.primaryColor.withOpacity(0.1)
+                          : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      day['isToday'] ? 'Today' : day['date'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: day['isToday']
+                            ? AppTheme.primaryColor
+                            : AppTheme.textSecondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            ...day['classes'].map<Widget>((cls) => _buildClassItem(cls)).toList(),
-            const SizedBox(height: 16),
-          ],
-          
-          // Goals & Tasks
-          if (day['goals'].isNotEmpty || day['tasks'].isNotEmpty) ...[
-            Text(
-              'Goals & Tasks',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...day['goals'].map<Widget>((goal) => _buildGoalItem(goal)).toList(),
-            ...day['tasks'].map<Widget>((task) => _buildTaskItem(task)).toList(),
-          ],
-          
-          // Free Time
-          if (day['freeTime'].isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              'Free Time Suggestions',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...day['freeTime'].map<Widget>((suggestion) => _buildSuggestionItem(suggestion)).toList(),
-          ],
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+              const SizedBox(height: 16),
+
+              // Classes
+              if (day['classes'].isNotEmpty) ...[
+                Text(
+                  'Classes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...day['classes']
+                    .map<Widget>((cls) => _buildClassItem(cls))
+                    .toList(),
+                const SizedBox(height: 16),
+              ],
+
+              // Goals & Tasks
+              if (day['goals'].isNotEmpty || day['tasks'].isNotEmpty) ...[
+                Text(
+                  'Goals & Tasks',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...day['goals']
+                    .map<Widget>((goal) => _buildGoalItem(goal))
+                    .toList(),
+                ...day['tasks']
+                    .map<Widget>((task) => _buildTaskItem(task))
+                    .toList(),
+              ],
+
+              // Free Time
+              if (day['freeTime'].isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  'Free Time Suggestions',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...day['freeTime']
+                    .map<Widget>(
+                      (suggestion) => _buildSuggestionItem(suggestion),
+                    )
+                    .toList(),
+              ],
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildClassItem(Map<String, dynamic> cls) {
@@ -657,19 +700,12 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.class_,
-            color: AppTheme.primaryColor,
-            size: 16,
-          ),
+          Icon(Icons.class_, color: AppTheme.primaryColor, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               '${cls['time']} - ${cls['subject']} (${cls['room']})',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textPrimaryColor,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textPrimaryColor),
             ),
           ),
         ],
@@ -682,10 +718,14 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _getGoalTypeColor(GoalType.values.firstWhere((e) => e.toString() == goal['type'])).withOpacity(0.1),
+        color: _getGoalTypeColor(
+          GoalType.values.firstWhere((e) => e.toString() == goal['type']),
+        ).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getGoalTypeColor(GoalType.values.firstWhere((e) => e.toString() == goal['type'])).withOpacity(0.3),
+          color: _getGoalTypeColor(
+            GoalType.values.firstWhere((e) => e.toString() == goal['type']),
+          ).withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -693,17 +733,16 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
         children: [
           Icon(
             Icons.flag,
-            color: _getGoalTypeColor(GoalType.values.firstWhere((e) => e.toString() == goal['type'])),
+            color: _getGoalTypeColor(
+              GoalType.values.firstWhere((e) => e.toString() == goal['type']),
+            ),
             size: 16,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               goal['title'],
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textPrimaryColor,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textPrimaryColor),
             ),
           ),
           Text(
@@ -711,7 +750,9 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: _getGoalTypeColor(GoalType.values.firstWhere((e) => e.toString() == goal['type'])),
+              color: _getGoalTypeColor(
+                GoalType.values.firstWhere((e) => e.toString() == goal['type']),
+              ),
             ),
           ),
         ],
@@ -730,27 +771,17 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.task,
-            color: AppTheme.textSecondaryColor,
-            size: 16,
-          ),
+          Icon(Icons.task, color: AppTheme.textSecondaryColor, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               task['title'],
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textPrimaryColor,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textPrimaryColor),
             ),
           ),
           Text(
             task['duration'],
-            style: TextStyle(
-              fontSize: 12,
-              color: AppTheme.textHintColor,
-            ),
+            style: TextStyle(fontSize: 12, color: AppTheme.textHintColor),
           ),
         ],
       ),
@@ -771,27 +802,17 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.lightbulb,
-            color: AppTheme.secondaryColor,
-            size: 16,
-          ),
+          Icon(Icons.lightbulb, color: AppTheme.secondaryColor, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               suggestion['title'],
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textPrimaryColor,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textPrimaryColor),
             ),
           ),
           Text(
             suggestion['duration'],
-            style: TextStyle(
-              fontSize: 12,
-              color: AppTheme.textHintColor,
-            ),
+            style: TextStyle(fontSize: 12, color: AppTheme.textHintColor),
           ),
         ],
       ),
@@ -800,7 +821,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildProgressTab() {
     final progressData = _getProgressData();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -809,11 +830,11 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
           // Overall Progress
           _buildOverallProgress(progressData),
           const SizedBox(height: 24),
-          
+
           // Goal Categories
           _buildGoalCategories(progressData['categories']),
           const SizedBox(height: 24),
-          
+
           // Recent Achievements
           _buildRecentAchievements(progressData['achievements']),
         ],
@@ -823,71 +844,81 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildOverallProgress(Map<String, dynamic> data) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Overall Progress',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
             ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildProgressStat(
-                  'Goals Completed',
-                  data['completedGoals'].toString(),
-                  data['totalGoals'].toString(),
-                  Icons.flag,
+              Text(
+                'Overall Progress',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildProgressStat(
-                  'Tasks Done',
-                  data['completedTasks'].toString(),
-                  data['totalTasks'].toString(),
-                  Icons.task,
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildProgressStat(
+                      'Goals Completed',
+                      data['completedGoals'].toString(),
+                      data['totalGoals'].toString(),
+                      Icons.flag,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildProgressStat(
+                      'Tasks Done',
+                      data['completedTasks'].toString(),
+                      data['totalTasks'].toString(),
+                      Icons.task,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Keep up the great work! You\'re making excellent progress towards your goals.',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 14,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Keep up the great work! You\'re making excellent progress towards your goals.',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
-  Widget _buildProgressStat(String label, String completed, String total, IconData icon) {
-    final percentage = total != '0' ? (int.parse(completed) / int.parse(total) * 100).round() : 0;
-    
+  Widget _buildProgressStat(
+    String label,
+    String completed,
+    String total,
+    IconData icon,
+  ) {
+    final percentage = total != '0'
+        ? (int.parse(completed) / int.parse(total) * 100).round()
+        : 0;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -927,34 +958,39 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildGoalCategories(List<Map<String, dynamic>> categories) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Goal Categories',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Goal Categories',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...categories
+                  .map((category) => _buildCategoryCard(category))
+                  .toList(),
+            ],
           ),
-          const SizedBox(height: 16),
-          ...categories.map((category) => _buildCategoryCard(category)).toList(),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> category) {
@@ -975,11 +1011,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
               color: category['color'].withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              category['icon'],
-              color: category['color'],
-              size: 20,
-            ),
+            child: Icon(category['icon'], color: category['color'], size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1020,55 +1052,60 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
 
   Widget _buildRecentAchievements(List<Map<String, dynamic>> achievements) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Recent Achievements',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (achievements.isEmpty)
-            Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.emoji_events,
-                    size: 48,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'No achievements yet',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppTheme.textSecondaryColor,
-                    ),
-                  ),
-                ],
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            )
-          else
-            ...achievements.map((achievement) => _buildAchievementCard(achievement)).toList(),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Recent Achievements',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (achievements.isEmpty)
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.emoji_events,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No achievements yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ...achievements
+                    .map((achievement) => _buildAchievementCard(achievement))
+                    .toList(),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildAchievementCard(Map<String, dynamic> achievement) {
@@ -1085,11 +1122,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.emoji_events,
-            color: AppTheme.presentColor,
-            size: 24,
-          ),
+          Icon(Icons.emoji_events, color: AppTheme.presentColor, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -1114,10 +1147,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
                 const SizedBox(height: 4),
                 Text(
                   achievement['date'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textHintColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: AppTheme.textHintColor),
                 ),
               ],
             ),
@@ -1186,10 +1216,11 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
           case 'Completed':
             return goal.status == GoalStatus.completed;
           case 'Overdue':
-            return goal.targetDate.isBefore(DateTime.now()) && goal.status != GoalStatus.completed;
+            return goal.targetDate.isBefore(DateTime.now()) &&
+                goal.status != GoalStatus.completed;
         }
       }
-      
+
       if (_selectedPriority != 'All') {
         switch (_selectedPriority) {
           case 'High':
@@ -1200,7 +1231,7 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
             return goal.priority == GoalPriority.low;
         }
       }
-      
+
       return true;
     }).toList();
   }
@@ -1218,10 +1249,18 @@ class _GoalsPlannerPageState extends ConsumerState<GoalsPlannerPage>
           'isToday': true,
           'classes': [
             {'time': '09:00', 'subject': 'Data Structures', 'room': 'Room 101'},
-            {'time': '11:00', 'subject': 'Database Management', 'room': 'Lab 2'},
+            {
+              'time': '11:00',
+              'subject': 'Database Management',
+              'room': 'Lab 2',
+            },
           ],
           'goals': [
-            {'title': 'Complete Math Assignment', 'type': 'academic', 'progress': 60},
+            {
+              'title': 'Complete Math Assignment',
+              'type': 'academic',
+              'progress': 60,
+            },
           ],
           'tasks': [
             {'title': 'Review DS Notes', 'duration': '30 min'},
