@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function institutionId() {
+      return request.auth.token.institutionId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && role() == 'admin';
+    }
+
+    function isTeacher() {
+      return isSignedIn() && role() == 'teacher';
+    }
+
+    function isStudent() {
+      return isSignedIn() && role() == 'student';
+    }
+
+    match /institutions/{instId}/exceptions/{studentId}/{fileName} {
+      allow read: if isSignedIn()
+                  && instId == institutionId()
+                  && (isAdmin() || isTeacher() || request.auth.uid == studentId);
+
+      allow create, update: if isStudent()
+                            && instId == institutionId()
+                            && request.auth.uid == studentId
+                            && request.resource.size < 10 * 1024 * 1024;
+
+      allow delete: if isAdmin() && instId == institutionId();
+    }
+
+    match /institutions/{instId}/announcements/{fileName} {
+      allow read: if isSignedIn() && instId == institutionId();
+      allow create, update: if (isTeacher() || isAdmin())
+                            && instId == institutionId()
+                            && request.resource.size < 25 * 1024 * 1024;
+      allow delete: if isAdmin() && instId == institutionId();
+    }
+  }
+}

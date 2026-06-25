@@ -1,0 +1,333 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────
+
+    /// True when the request carries a valid Firebase Auth token.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /// The caller's role string from custom claims. Never trust Firestore data.
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin()   { return isSignedIn() && role() == 'admin'; }
+    function isTeacher() { return isSignedIn() && role() == 'teacher'; }
+    function isStudent() { return isSignedIn() && role() == 'student'; }
+    function institutionId() { return request.auth.token.institutionId; }
+    function sameInstitution(data) {
+      return isSignedIn() && data.institutionId == institutionId();
+    }
+    function mutableUserProfileFields() {
+      return [
+        'name',
+        'phone',
+        'photoUrl',
+        'department',
+        'year',
+        'section',
+        'subjects',
+        'interests',
+        'strengths',
+        'goals',
+        'privacy',
+        'deviceHash',
+        'preferences',
+        'lastActive'
+      ];
+    }
+    function ownerCreatableUserProfileFields() {
+      return [
+        'uid',
+        'email',
+        'institutionId',
+        'name',
+        'phone',
+        'photoUrl',
+        'department',
+        'year',
+        'section',
+        'subjects',
+        'interests',
+        'strengths',
+        'goals',
+        'privacy',
+        'deviceHash',
+        'preferences',
+        'lastActive',
+        'createdAt'
+      ];
+    }
+    function exceptionCreateFields() {
+      return [
+        'id',
+        'institutionId',
+        'session_id',
+        'student_id',
+        'teacher_id',
+        'attendance_record_id',
+        'student_name',
+        'student_email',
+        'type',
+        'status',
+        'reason',
+        'supporting_document',
+        'attachment_paths',
+        'requested_at',
+        'original_status',
+        'requested_status',
+        'metadata'
+      ];
+    }
+
+    /// True when the caller's UID matches the given uid.
+    function isOwner(uid) { return request.auth.uid == uid; }
+
+    // ── /users/{uid} ──────────────────────────────────────────────────────
+    //
+    // • Admins can read/write profiles inside their institution.
+    // • A user can read/write their own profile.
+    // • CRITICAL: clients can update only mutable profile fields. Role and
+    //   institutionId live in custom claims/protected backend workflows.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || (isAdmin() && sameInstitution(resource.data));
+
+      // Owner creates are only for profile completion when a backend profile
+      // does not exist yet. The document must stay in the caller institution
+      // and cannot include protected fields.
+      allow create: if isOwner(uid)
+                    && sameInstitution(request.resource.data)
+                    && request.resource.data.keys()
+                       .hasOnly(ownerCreatableUserProfileFields());
+
+      // Owner updates: only mutable profile fields may change.
+      allow update: if isOwner(uid)
+                    && sameInstitution(resource.data)
+                    && request.resource.data.institutionId == resource.data.institutionId
+                    && request.resource.data.diff(resource.data)
+                       .affectedKeys()
+                       .hasOnly(mutableUserProfileFields());
+
+      // Admin writes: scoped to the admin's institution.
+      allow create: if isAdmin() && sameInstitution(request.resource.data);
+      allow update: if isAdmin()
+                    && sameInstitution(resource.data)
+                    && request.resource.data.institutionId == resource.data.institutionId;
+      allow delete: if isAdmin() && sameInstitution(resource.data);
+    }
+
+    // ── /timetables/{id} ─────────────────────────────────────────────────
+    //
+    // • All authenticated users can read timetable entries.
+    // • Only admins can create/update timetable records.
+    match /timetables/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── /courses/{id} ────────────────────────────────────────────────────
+    match /courses/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── /sessions/{id} ───────────────────────────────────────────────────
+    //
+    // • Any authenticated user can read sessions (for liveboard).
+    // • Teachers can create sessions.
+    // • Teachers can update only sessions they own (teacherId == caller uid).
+    match /sessions/{id} {
+      allow read:   if sameInstitution(resource.data);
+      allow create: if isTeacher()
+                    && sameInstitution(request.resource.data)
+                    && request.resource.data.teacherId == request.auth.uid;
+      allow update: if isTeacher()
+                    && resource.data.teacherId == request.auth.uid
+                    && request.resource.data.teacherId == request.auth.uid
+                    && request.resource.data.institutionId == resource.data.institutionId;
+      allow delete: if isAdmin() && sameInstitution(resource.data);
+    }
+
+    // ── /attendance/{sessionId}/records/{studentId} ───────────────────────
+    //
+    // • A student can create exactly one record for themselves in a session
+    //   belonging to their institution.
+    // • Teachers/admins can read records for sessions in their institution.
+    // • Students can read only their own record.
+    // • No updates/deletes from the client — corrections go via exceptions.
+    match /attendance/{sessionId}/records/{studentId} {
+      allow create: if isStudent()
+                    && isOwner(studentId)
+                    && request.resource.data.studentId == request.auth.uid
+                    && request.resource.data.sessionId == sessionId
+                    && exists(/databases/$(database)/documents/sessions/$(sessionId))
+                    && get(/databases/$(database)/documents/sessions/$(sessionId))
+                       .data.institutionId == institutionId()
+                    && !exists(/databases/$(database)/documents
+                        /attendance/$(sessionId)/records/$(studentId));
+
+      allow read: if isOwner(studentId)
+                  || ((isTeacher() || isAdmin())
+                      && exists(/databases/$(database)/documents/sessions/$(sessionId))
+                      && get(/databases/$(database)/documents/sessions/$(sessionId))
+                         .data.institutionId == institutionId());
+    }
+
+    // ── /attendance_exceptions/{id} ───────────────────────────────────────
+    //
+    // • Students can create exception requests (own data only).
+    // • Teachers/admins can read exceptions assigned to them.
+    // • Students can read their own exceptions.
+    // • Teachers can update ONLY the review fields; studentId and sessionId
+    //   are immutable after creation.
+    match /attendance_exceptions/{id} {
+      allow create: if isStudent()
+                    && sameInstitution(request.resource.data)
+                    && request.resource.data.student_id == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.keys().hasOnly(exceptionCreateFields())
+                    && exists(/databases/$(database)/documents
+                        /sessions/$(request.resource.data.session_id))
+                    && get(/databases/$(database)/documents
+                        /sessions/$(request.resource.data.session_id))
+                       .data.institutionId == institutionId();
+
+      allow read: if (isTeacher()
+                      && resource.data.teacher_id == request.auth.uid)
+                  || (isAdmin() && sameInstitution(resource.data))
+                  || (isStudent()
+                      && resource.data.student_id == request.auth.uid);
+
+      // Review transitions are handled by the reviewAttendanceException
+      // callable Function so that status changes, attendance correction, and
+      // audit logging are transactional.
+      allow update: if false;
+
+      allow delete: if isAdmin() && sameInstitution(resource.data);
+    }
+
+    // ── /announcements/{id} ───────────────────────────────────────────────
+    //
+    // • Any authenticated user can read announcements.
+    // • Teachers/admins can create announcements.
+    // • The sender (or admin) can update their own announcements.
+    // • The sender (or admin) can delete their own announcements.
+    // • Users can update readBy via arrayUnion only (for markRead).
+    match /announcements/{id} {
+      allow read: if sameInstitution(resource.data);
+
+      allow create: if (isTeacher() || isAdmin())
+                    && sameInstitution(request.resource.data)
+                    && request.resource.data.senderId == request.auth.uid;
+
+      allow update: if ((isTeacher() || isAdmin())
+                       && sameInstitution(resource.data)
+                       && resource.data.senderId == request.auth.uid)
+                    || (isSignedIn()
+                       && sameInstitution(resource.data)
+                       && request.resource.data.institutionId
+                          == resource.data.institutionId
+                       && request.resource.data.diff(resource.data)
+                          .affectedKeys()
+                          .hasOnly(['readBy'])
+                       && request.resource.data.readBy.hasAll(resource.data.readBy)
+                       && request.resource.data.readBy.hasAny([request.auth.uid])
+                       && request.resource.data.readBy.size()
+                          <= resource.data.readBy.size() + 1);
+
+      allow delete: if (isAdmin() && sameInstitution(resource.data))
+                    || ((isTeacher() || isAdmin())
+                        && sameInstitution(resource.data)
+                        && resource.data.senderId == request.auth.uid);
+    }
+
+    // ── /notifications/{id} ───────────────────────────────────────────────
+    //
+    // • Users can read their own inbox.
+    // • Users can only mark their own notification as read.
+    // • Teachers/admins may create institution-scoped notices; backend
+    //   Functions bypass rules for authoritative events.
+    match /notifications/{id} {
+      allow read: if resource.data.recipientId == request.auth.uid
+                  || (isAdmin() && sameInstitution(resource.data));
+
+      allow create: if (isTeacher() || isAdmin())
+                    && sameInstitution(request.resource.data);
+
+      allow update: if resource.data.recipientId == request.auth.uid
+                    && request.resource.data.institutionId
+                       == resource.data.institutionId
+                    && request.resource.data.recipientId
+                       == resource.data.recipientId
+                    && request.resource.data.diff(resource.data)
+                       .affectedKeys()
+                       .hasOnly(['readAt']);
+
+      allow delete: if isAdmin() && sameInstitution(resource.data);
+    }
+
+    match /audit_logs/{id} {
+      allow read: if isAdmin() && sameInstitution(resource.data);
+      allow write: if false;
+    }
+
+    match /notification_failures/{id} {
+      allow read: if isAdmin() && sameInstitution(resource.data);
+      allow write: if false;
+    }
+
+    // ── /invitations/{token} ──────────────────────────────────────────────
+    //
+    // • Admins create invitation documents.
+    // • Any signed-in user can read an invitation (to accept it).
+    // • Admins can delete used invitations.
+    match /invitations/{token} {
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Phase 4 academic catalog. Every document is institution-scoped.
+    match /{collection}/{id} {
+      allow read: if collection in [
+                    'departments', 'terms', 'subjects', 'sections', 'rooms',
+                    'teaching_assignments', 'academic_timetable'
+                  ]
+                  && sameInstitution(resource.data);
+      allow create: if collection in [
+                      'departments', 'terms', 'subjects', 'sections', 'rooms',
+                      'teaching_assignments', 'academic_timetable'
+                    ]
+                    && isAdmin()
+                    && sameInstitution(request.resource.data);
+      allow update: if collection in [
+                      'departments', 'terms', 'subjects', 'sections', 'rooms',
+                      'teaching_assignments', 'academic_timetable'
+                    ]
+                    && isAdmin()
+                    && sameInstitution(resource.data)
+                    && request.resource.data.institutionId == resource.data.institutionId;
+      allow delete: if collection in [
+                      'departments', 'terms', 'subjects', 'sections', 'rooms',
+                      'teaching_assignments', 'academic_timetable'
+                    ]
+                    && isAdmin()
+                    && sameInstitution(resource.data);
+    }
+
+    match /enrollments/{id} {
+      allow read: if sameInstitution(resource.data)
+                  && (isAdmin() || isTeacher()
+                      || resource.data.studentId == request.auth.uid);
+      allow create: if isAdmin() && sameInstitution(request.resource.data);
+      allow update: if isAdmin()
+                    && sameInstitution(resource.data)
+                    && request.resource.data.institutionId
+                       == resource.data.institutionId;
+      allow delete: if isAdmin() && sameInstitution(resource.data);
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "smart-circulam-dev",
+    "dev": "smart-circulam-dev",
+    "staging": "smart-circulam-staging"
+  },
+  "targets": {}
+}

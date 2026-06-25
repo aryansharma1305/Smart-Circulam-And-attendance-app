@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "868316204029",
-    "project_id": "smartstudy-plus",
-    "storage_bucket": "smartstudy-plus.firebasestorage.app"
+    "project_number": "578864650172",
+    "project_id": "smart-circulam-staging",
+    "storage_bucket": "smart-circulam-staging.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:868316204029:android:6a26ed783c93470f75e794",
+        "mobilesdk_app_id": "1:578864650172:android:791a76fa97cd1011c5fdb9",
         "android_client_info": {
           "package_name": "com.example.management_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC2UyJdtGhsXhYgva-QUyL1Z4flB10kKYc"
+          "current_key": "AIzaSyDmS5R6ha5G2X1BjN4y3ntda6mzFgs9Z2s"
         }
       ],
       "services": {

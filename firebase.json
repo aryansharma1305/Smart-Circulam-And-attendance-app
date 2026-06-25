@@ -1,0 +1,82 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": {
+    "source": "functions",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "functions": {
+      "port": 5001
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "smart-circulam-staging",
+          "appId": "1:578864650172:android:791a76fa97cd1011c5fdb9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "smart-circulam-staging",
+          "appId": "1:578864650172:ios:69e3cf23f2c132aac5fdb9",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "smart-circulam-staging",
+          "appId": "1:578864650172:ios:69e3cf23f2c132aac5fdb9",
+          "uploadDebugSymbols": true,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options_dev.dart": {
+          "projectId": "smart-circulam-dev",
+          "configurations": {
+            "android": "1:1040337939940:android:8bb2f5914555a28b4aebf1",
+            "ios": "1:1040337939940:ios:a20cf3d4f1c243ac4aebf1",
+            "macos": "1:1040337939940:ios:a20cf3d4f1c243ac4aebf1",
+            "web": "1:1040337939940:web:c92abb4f31256e8d4aebf1"
+          }
+        },
+        "lib/firebase_options_staging.dart": {
+          "projectId": "smart-circulam-staging",
+          "configurations": {
+            "android": "1:578864650172:android:791a76fa97cd1011c5fdb9",
+            "ios": "1:578864650172:ios:69e3cf23f2c132aac5fdb9",
+            "macos": "1:578864650172:ios:69e3cf23f2c132aac5fdb9",
+            "web": "1:578864650172:web:cbae45eccd4b640cc5fdb9"
+          }
+        }
+      }
+    }
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "attendance_exceptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "teacher_id",     "order": "ASCENDING"  },
+        { "fieldPath": "status",        "order": "ASCENDING"  },
+        { "fieldPath": "requested_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "attendance_exceptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "student_id",     "order": "ASCENDING"  },
+        { "fieldPath": "requested_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "announcements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "institutionId",  "order": "ASCENDING"  },
+        { "fieldPath": "isGlobal",  "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "announcements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "institutionId",  "order": "ASCENDING"  },
+        { "fieldPath": "senderId",  "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "readAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "teacherId",  "order": "ASCENDING"  },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timetableId", "order": "ASCENDING"  },
+        { "fieldPath": "state",       "order": "ASCENDING"  },
+        { "fieldPath": "createdAt",   "order": "ASCENDING"  }
+      ]
+    },
+    {
+      "collectionGroup": "enrollments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "institutionId", "order": "ASCENDING" },
+        { "fieldPath": "logicalKey", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "enrollments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "institutionId", "order": "ASCENDING" },
+        { "fieldPath": "studentId", "order": "ASCENDING" },
+        { "fieldPath": "sectionId", "order": "ASCENDING" },
+        { "fieldPath": "subjectId", "order": "ASCENDING" },
+        { "fieldPath": "termId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "academic_timetable",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "institutionId", "order": "ASCENDING" },
+        { "fieldPath": "termId", "order": "ASCENDING" },
+        { "fieldPath": "weekday", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
