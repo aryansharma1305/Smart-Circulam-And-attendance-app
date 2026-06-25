@@ -1,5 +1,7 @@
 enum GoalType { academic, career, personal, skill }
+
 enum GoalStatus { active, completed, paused, cancelled }
+
 enum GoalPriority { low, medium, high }
 
 class Goal {
@@ -53,13 +55,20 @@ class Goal {
         (e) => e.toString() == 'GoalPriority.${map['priority']}',
         orElse: () => GoalPriority.medium,
       ),
-      targetDate: DateTime.parse(map['target_date'] ?? DateTime.now().add(Duration(days: 30)).toIso8601String()),
+      targetDate: DateTime.parse(
+        map['target_date'] ??
+            DateTime.now().add(Duration(days: 30)).toIso8601String(),
+      ),
       tags: List<String>.from(map['tags'] ?? []),
       metrics: Map<String, dynamic>.from(map['metrics'] ?? {}),
       progress: map['progress'] ?? 0,
       notes: map['notes'],
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        map['updated_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
@@ -206,12 +215,19 @@ class GoalObjective {
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       isCompleted: map['is_completed'] ?? false,
-      completedAt: map['completed_at'] != null 
-          ? DateTime.parse(map['completed_at']) 
+      completedAt: map['completed_at'] != null
+          ? DateTime.parse(map['completed_at'])
           : null,
-      targetDate: DateTime.parse(map['target_date'] ?? DateTime.now().add(Duration(days: 7)).toIso8601String()),
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
+      targetDate: DateTime.parse(
+        map['target_date'] ??
+            DateTime.now().add(Duration(days: 7)).toIso8601String(),
+      ),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        map['updated_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 

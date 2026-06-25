@@ -10,7 +10,8 @@ class User {
   final String? year;
   final String? section;
   final String? photoUrl;
-  final List<String> subjects; // For teachers: subjects taught, for students: subjects enrolled
+  final List<String>
+  subjects; // For teachers: subjects taught, for students: subjects enrolled
   final String? parentId; // For students: link to parent account
   final List<String> interests;
   final List<String> strengths;
@@ -18,6 +19,7 @@ class User {
   final Map<String, dynamic> privacy;
   final String? deviceHash;
   final String? institutionCode;
+  final String? institutionId;
   final Map<String, dynamic> preferences;
   final DateTime createdAt;
   final DateTime lastActive;
@@ -40,6 +42,7 @@ class User {
     this.privacy = const {},
     this.deviceHash,
     this.institutionCode,
+    this.institutionId,
     this.preferences = const {},
     required this.createdAt,
     required this.lastActive,
@@ -67,6 +70,7 @@ class User {
       privacy: Map<String, dynamic>.from(json['privacy'] ?? {}),
       deviceHash: json['deviceHash'],
       institutionCode: json['institutionCode'],
+      institutionId: json['institutionId'],
       preferences: Map<String, dynamic>.from(json['preferences'] ?? {}),
       createdAt: DateTime.parse(json['createdAt']),
       lastActive: DateTime.parse(json['lastActive']),
@@ -92,6 +96,7 @@ class User {
       'privacy': privacy,
       'deviceHash': deviceHash,
       'institutionCode': institutionCode,
+      'institutionId': institutionId,
       'preferences': preferences,
       'createdAt': createdAt.toIso8601String(),
       'lastActive': lastActive.toIso8601String(),
@@ -115,6 +120,7 @@ class User {
     Map<String, dynamic>? privacy,
     String? deviceHash,
     String? institutionCode,
+    String? institutionId,
     Map<String, dynamic>? preferences,
     DateTime? lastActive,
   }) {
@@ -136,6 +142,7 @@ class User {
       privacy: privacy ?? this.privacy,
       deviceHash: deviceHash ?? this.deviceHash,
       institutionCode: institutionCode ?? this.institutionCode,
+      institutionId: institutionId ?? this.institutionId,
       preferences: preferences ?? this.preferences,
       createdAt: createdAt,
       lastActive: lastActive ?? this.lastActive,
@@ -162,4 +169,15 @@ class User {
         return 'Counselor';
     }
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is User && runtimeType == other.runtimeType && uid == other.uid;
+
+  @override
+  int get hashCode => uid.hashCode;
+
+  @override
+  String toString() => 'User(uid: $uid, name: $name, role: ${role.name})';
 }

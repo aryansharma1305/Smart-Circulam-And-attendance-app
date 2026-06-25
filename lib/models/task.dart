@@ -1,5 +1,7 @@
 enum TaskType { reading, coding, quiz, project, exercise, summary, other }
+
 enum TaskDifficulty { easy, medium, hard }
+
 enum TaskStatus { pending, inProgress, completed, skipped }
 
 class Task {
@@ -59,11 +61,13 @@ class Task {
       subject: map['subject'],
       dueAt: map['dueAt'] != null
           ? DateTime.tryParse(map['dueAt'])
-          : (map['due_at'] != null
-              ? DateTime.tryParse(map['due_at'])
-              : null),
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
+          : (map['due_at'] != null ? DateTime.tryParse(map['due_at']) : null),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        map['updated_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
@@ -215,10 +219,12 @@ class TaskRecommendation {
       taskIds: List<String>.from(map['task_ids'] ?? []),
       rationale: map['rationale'] ?? '',
       isCompleted: map['is_completed'] ?? false,
-      completedAt: map['completed_at'] != null 
-          ? DateTime.parse(map['completed_at']) 
+      completedAt: map['completed_at'] != null
+          ? DateTime.parse(map['completed_at'])
           : null,
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
@@ -272,17 +278,21 @@ class StudentTask {
         (e) => e.toString() == 'TaskStatus.${map['status']}',
         orElse: () => TaskStatus.pending,
       ),
-      startedAt: map['started_at'] != null 
-          ? DateTime.parse(map['started_at']) 
+      startedAt: map['started_at'] != null
+          ? DateTime.parse(map['started_at'])
           : null,
-      completedAt: map['completed_at'] != null 
-          ? DateTime.parse(map['completed_at']) 
+      completedAt: map['completed_at'] != null
+          ? DateTime.parse(map['completed_at'])
           : null,
       actualDurationMinutes: map['actual_duration_minutes'],
       notes: map['notes'],
       rating: map['rating']?.toDouble(),
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        map['updated_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 

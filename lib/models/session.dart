@@ -37,12 +37,19 @@ class Session {
         orElse: () => SessionState.planned,
       ),
       qrSeed: map['qr_seed'] ?? '',
-      qrExpiry: DateTime.parse(map['qr_expiry'] ?? DateTime.now().add(Duration(minutes: 30)).toIso8601String()),
+      qrExpiry: DateTime.parse(
+        map['qr_expiry'] ??
+            DateTime.now().add(Duration(minutes: 30)).toIso8601String(),
+      ),
       proximityPolicy: Map<String, dynamic>.from(map['proximity_policy'] ?? {}),
       stats: Map<String, dynamic>.from(map['stats'] ?? {}),
       notes: map['notes'],
-      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(map['updated_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        map['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        map['updated_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
