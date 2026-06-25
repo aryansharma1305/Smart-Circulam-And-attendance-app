@@ -131,18 +131,23 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                                   vertical: 12,
                                 ),
                               ),
-                              items: UserRole.values.map((role) {
-                                return DropdownMenuItem(
-                                  value: role,
-                                  child: Text(
-                                    role
-                                        .toString()
-                                        .split('.')
-                                        .last
-                                        .toUpperCase(),
-                                  ),
-                                );
-                              }).toList(),
+                              items:
+                                  const [
+                                    UserRole.student,
+                                    UserRole.teacher,
+                                    UserRole.admin,
+                                  ].map((role) {
+                                    return DropdownMenuItem(
+                                      value: role,
+                                      child: Text(
+                                        role
+                                            .toString()
+                                            .split('.')
+                                            .last
+                                            .toUpperCase(),
+                                      ),
+                                    );
+                                  }).toList(),
                               onChanged: (value) {
                                 setState(() {
                                   _selectedRole = value!;
@@ -436,7 +441,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           context.go('/student'); // Parents view student interface
           break;
         case UserRole.counselor:
-          context.go('/counselor');
+          context.go('/role-selection');
           break;
       }
     }

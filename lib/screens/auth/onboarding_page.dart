@@ -175,23 +175,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Skip and Demo buttons
+            // Skip button
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () => context.go('/role-demo'),
-                    child: Text(
-                      'Demo',
-                      style: TextStyle(
-                        color: AppTheme.primaryColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
                   TextButton(
                     onPressed: () => context.go('/role-selection'),
                     child: Text(

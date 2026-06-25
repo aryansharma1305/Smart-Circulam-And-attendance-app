@@ -92,10 +92,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 _passwordController.text,
               );
         } else {
-          print('Calling signInWithEmailAndPassword');
+          print('Calling signIn');
           await ref
               .read(authProvider.notifier)
-              .signInWithEmailAndPassword(
+              .signIn(
                 _emailController.text.trim(),
                 _passwordController.text,
               );
@@ -134,8 +134,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             context.go('/student'); // Parents view student dashboard
             break;
           case UserRole.counselor:
-            print('Navigating to counselor dashboard');
-            context.go('/counselor');
+            context.go('/role-selection');
             break;
         }
       } else {
@@ -292,6 +291,22 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           return null;
                         },
                       ),
+                      if (_isLogin) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.push('/forgot-password'),
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -543,45 +558,53 @@ class _LoginPageState extends ConsumerState<LoginPage>
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: UserRole.values.map((role) {
-            final isSelected = _selectedRole == role;
-            print('Building role button for: $role, isSelected: $isSelected');
-            return GestureDetector(
-              onTap: () {
-                print('Role selected: $role');
-                print('Current _selectedRole before update: $_selectedRole');
-                setState(() {
-                  _selectedRole = role;
-                  print('_selectedRole after update: $_selectedRole');
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppTheme.primaryColor
-                        : Colors.grey[300]!,
+          children: const [UserRole.student, UserRole.teacher, UserRole.admin]
+              .map((role) {
+                final isSelected = _selectedRole == role;
+                print(
+                  'Building role button for: $role, isSelected: $isSelected',
+                );
+                return GestureDetector(
+                  onTap: () {
+                    print('Role selected: $role');
+                    print(
+                      'Current _selectedRole before update: $_selectedRole',
+                    );
+                    setState(() {
+                      _selectedRole = role;
+                      print('_selectedRole after update: $_selectedRole');
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppTheme.primaryColor
+                          : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.primaryColor
+                            : Colors.grey[300]!,
+                      ),
+                    ),
+                    child: Text(
+                      _getRoleDisplayName(role),
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : AppTheme.textSecondaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  _getRoleDisplayName(role),
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : AppTheme.textSecondaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              })
+              .toList(),
         ),
       ],
     );

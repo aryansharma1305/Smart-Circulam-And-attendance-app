@@ -20,45 +20,42 @@ class RoleSelectionPage extends StatelessWidget {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const Spacer(),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
 
-                // App Logo and Title
-                _buildHeader(),
+                  // App Logo and Title
+                  _buildHeader(),
 
-                const SizedBox(height: 60),
+                  const SizedBox(height: 60),
 
-                // Role Selection Prompt
-                Text(
-                      'I am a...',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(duration: const Duration(milliseconds: 600))
-                    .slideY(begin: 0.3),
+                  // Role Selection Prompt
+                  Text(
+                        'I am a...',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: const Duration(milliseconds: 600))
+                      .slideY(begin: 0.3),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
-                // Role Cards
-                _buildRoleCards(context),
+                  // Role Cards
+                  _buildRoleCards(context),
 
-                const Spacer(),
+                  const SizedBox(height: 40),
 
-                // Continue Button
-                _buildContinueButton(context),
+                  // Continue Button
+                  _buildContinueButton(context),
 
-                const SizedBox(height: 16),
-
-                // Demo Button
-                _buildDemoButton(context),
-
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 36),
+                ],
+              ),
             ),
           ),
         ),
@@ -138,7 +135,7 @@ class RoleSelectionPage extends StatelessWidget {
                 title: 'Teacher',
                 description: 'Start sessions & track classes',
                 icon: Icons.school,
-                onTap: () => context.go('/teacher'),
+                onTap: () => context.go('/login'),
               ),
             ),
           ],
@@ -146,29 +143,12 @@ class RoleSelectionPage extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        // Second Row
-        Row(
-          children: [
-            Expanded(
-              child: _buildRoleCard(
-                context,
-                title: 'Admin',
-                description: 'Manage institute & view reports',
-                icon: Icons.admin_panel_settings,
-                onTap: () => context.go('/admin/dashboard'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildRoleCard(
-                context,
-                title: 'Counselor',
-                description: 'Guide students & track goals',
-                icon: Icons.psychology,
-                onTap: () => context.go('/counsellor'),
-              ),
-            ),
-          ],
+        _buildRoleCard(
+          context,
+          title: 'Admin',
+          description: 'Manage institute & view reports',
+          icon: Icons.admin_panel_settings,
+          onTap: () => context.go('/login'),
         ),
       ],
     );
@@ -251,31 +231,6 @@ class RoleSelectionPage extends StatelessWidget {
         .slideY(begin: 0.3);
   }
 
-  Widget _buildDemoButton(BuildContext context) {
-    return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: OutlinedButton.icon(
-            onPressed: () => context.go('/role-demo'),
-            icon: const Icon(Icons.visibility, size: 20),
-            label: const Text(
-              'View All Dashboards',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.white, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        )
-        .animate()
-        .fadeIn(duration: const Duration(milliseconds: 600))
-        .slideY(begin: 0.3);
-  }
-
   void _showRoleSelectionDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -294,23 +249,9 @@ class RoleSelectionPage extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/teacher');
+              context.go('/login');
             },
-            child: const Text('Teacher'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/admin/dashboard');
-            },
-            child: const Text('Admin'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/counsellor');
-            },
-            child: const Text('Counsellor'),
+            child: const Text('Teacher/Admin Login'),
           ),
         ],
       ),
