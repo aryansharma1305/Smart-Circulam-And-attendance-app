@@ -4,29 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../models/user.dart';
+import '../../models/dashboard_summary.dart';
 import '../../providers/auth_provider.dart';
-
-class TeacherClass {
-  final String timetableId;
-  final String course;
-  final String section;
-  final String room;
-  final DateTime start;
-  final DateTime end;
-  final int enrolled;
-  final String status; // 'planned' | 'live' | 'closed'
-
-  TeacherClass({
-    required this.timetableId,
-    required this.course,
-    required this.section,
-    required this.room,
-    required this.start,
-    required this.end,
-    required this.enrolled,
-    required this.status,
-  });
-}
+import '../../controllers/teacher_dashboard_controller.dart';
 
 class TeacherHomePage extends ConsumerStatefulWidget {
   const TeacherHomePage({super.key});
@@ -36,79 +16,9 @@ class TeacherHomePage extends ConsumerStatefulWidget {
 }
 
 class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
-  List<TeacherClass> todayClasses = [];
-  int pendingExceptions = 3;
-  List<Map<String, dynamic>> recentSessions = [];
-
   @override
   void initState() {
     super.initState();
-    _loadMockData();
-  }
-
-  void _loadMockData() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    todayClasses = [
-      TeacherClass(
-        timetableId: 'tt1',
-        course: 'DSA',
-        section: 'Sec A',
-        room: 'Room B201',
-        start: today.add(const Duration(hours: 10)),
-        end: today.add(const Duration(hours: 10, minutes: 50)),
-        enrolled: 52,
-        status: 'planned',
-      ),
-      TeacherClass(
-        timetableId: 'tt2',
-        course: 'DBMS',
-        section: 'Sec B',
-        room: 'Room B205',
-        start: today.add(const Duration(hours: 14)),
-        end: today.add(const Duration(hours: 14, minutes: 50)),
-        enrolled: 48,
-        status: 'live',
-      ),
-      TeacherClass(
-        timetableId: 'tt3',
-        course: 'OS',
-        section: 'Sec C',
-        room: 'Room B210',
-        start: today.add(const Duration(hours: 16)),
-        end: today.add(const Duration(hours: 16, minutes: 50)),
-        enrolled: 45,
-        status: 'closed',
-      ),
-    ];
-
-    recentSessions = [
-      {
-        'course': 'DSA',
-        'section': 'Sec A',
-        'date': 'Yesterday',
-        'present': 45,
-        'total': 52,
-        'percentage': 87,
-      },
-      {
-        'course': 'DBMS',
-        'section': 'Sec B',
-        'date': '2 days ago',
-        'present': 42,
-        'total': 48,
-        'percentage': 88,
-      },
-      {
-        'course': 'OS',
-        'section': 'Sec C',
-        'date': '3 days ago',
-        'present': 40,
-        'total': 45,
-        'percentage': 89,
-      },
-    ];
   }
 
   @override
@@ -122,16 +32,7 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.push('/teacher/notifications'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/teacher/settings'),
-          ),
-        ],
+        actions: [],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -202,7 +103,10 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
   }
 
   Widget _buildTodayClasses() {
-    if (todayClasses.isEmpty) {
+    final summaryAsync = ref.watch(teacherDashboardControllerProvider);
+    final classes = summaryAsync.value?.todayClasses ?? [];
+
+    if (classes.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -218,12 +122,12 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
           ),
         ),
         const SizedBox(height: 16),
-        ...todayClasses.map((cls) => _buildClassCard(cls)),
+        ...classes.map((cls) => _buildClassCard(cls)),
       ],
     );
   }
 
-  Widget _buildClassCard(TeacherClass cls) {
+  Widget _buildClassCard(TeacherClassSlot cls) {
     final timeFormat = DateFormat('HH:mm');
     final statusColor = _getStatusColor(cls.status);
 
@@ -418,7 +322,9 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
   }
 
   Widget _buildPendingExceptions() {
-    if (pendingExceptions == 0) return const SizedBox.shrink();
+    final summaryAsync = ref.watch(teacherDashboardControllerProvider);
+    final count = summaryAsync.value?.pendingExceptionsCount ?? 0;
+    if (count == 0) return const SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -433,7 +339,7 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'You have $pendingExceptions correction requests',
+              'You have $count correction requests',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.orange[700],
@@ -451,6 +357,10 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
   }
 
   Widget _buildRecentSessions() {
+    final summaryAsync = ref.watch(teacherDashboardControllerProvider);
+    final sessions = summaryAsync.value?.recentSessions ?? [];
+    if (sessions.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -463,12 +373,12 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
           ),
         ),
         const SizedBox(height: 12),
-        ...recentSessions.map((session) => _buildSessionCard(session)),
+        ...sessions.map((session) => _buildSessionCard(session)),
       ],
     );
   }
 
-  Widget _buildSessionCard(Map<String, dynamic> session) {
+  Widget _buildSessionCard(RecentSessionSummary session) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -490,7 +400,7 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${session['course']} • ${session['section']}',
+                  '${session.course} • ${session.section}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -498,7 +408,7 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
                   ),
                 ),
                 Text(
-                  session['date'],
+                  session.dateLabel,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondaryColor,
@@ -511,7 +421,7 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${session['present']}/${session['total']}',
+                '${session.presentCount}/${session.totalCount}',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -519,19 +429,13 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
                 ),
               ),
               Text(
-                '${session['percentage']}%',
+                '${session.percentage.toStringAsFixed(0)}%',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppTheme.textSecondaryColor,
                 ),
               ),
             ],
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.visibility, size: 18),
-            onPressed: () => _viewSession(session),
-            color: AppTheme.primaryColor,
           ),
         ],
       ),
@@ -589,12 +493,6 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
               Colors.purple,
               () => context.push('/teacher/roster'),
             ),
-            _buildQuickActionCard(
-              'Settings',
-              Icons.settings,
-              Colors.grey,
-              () => context.push('/teacher/settings'),
-            ),
           ],
         ),
       ],
@@ -644,26 +542,25 @@ class _TeacherHomePageState extends ConsumerState<TeacherHomePage> {
     );
   }
 
-  void _startClass(TeacherClass cls) {
-    context.push('/teacher/start-session', extra: cls);
+  void _startClass(TeacherClassSlot cls) {
+    context.push('/teacher/start-session', extra: {
+      'subject': cls.course,
+      'section': cls.section,
+      'room': cls.room,
+      'timetableId': cls.timetableId,
+      'start': cls.start,
+    });
   }
 
-  void _openRoster(TeacherClass cls) {
-    context.push('/teacher/roster', extra: cls);
+  void _openRoster(TeacherClassSlot cls) {
+    context.push('/teacher/roster');
   }
 
-  void _openDisplay(TeacherClass cls) {
-    context.push('/teacher/attendance-display', extra: cls);
+  void _openDisplay(TeacherClassSlot cls) {
+    context.push('/teacher/attendance-display');
   }
 
   void _openExceptions() {
     context.push('/teacher/attendance-exceptions');
-  }
-
-  void _viewSession(Map<String, dynamic> session) {
-    // Navigate to session details
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Viewing ${session['course']} session')),
-    );
   }
 }

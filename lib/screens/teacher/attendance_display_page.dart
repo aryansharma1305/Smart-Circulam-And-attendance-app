@@ -4,19 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
-import 'teacher_home_page.dart';
+import '../../models/dashboard_summary.dart';
 
 class AttendanceDisplayPage extends ConsumerStatefulWidget {
-  final TeacherClass? classData;
-  
+  final TeacherClassSlot? classData;
+
   const AttendanceDisplayPage({super.key, this.classData});
 
   @override
-  ConsumerState<AttendanceDisplayPage> createState() => _AttendanceDisplayPageState();
+  ConsumerState<AttendanceDisplayPage> createState() =>
+      _AttendanceDisplayPageState();
 }
 
 class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
-  late TeacherClass classData;
+  late TeacherClassSlot classData;
   bool isLive = false;
   String qrToken = '';
   int presentCount = 0;
@@ -37,9 +38,9 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
     super.dispose();
   }
 
-  TeacherClass _getDefaultClass() {
+  TeacherClassSlot _getDefaultClass() {
     final now = DateTime.now();
-    return TeacherClass(
+    return TeacherClassSlot(
       timetableId: 'default',
       course: 'DSA',
       section: 'Sec A',
@@ -56,7 +57,7 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
     qrToken = _generateQRToken();
     presentCount = 38;
     totalCount = classData.enrolled;
-    
+
     if (isLive) {
       _startAutoRotate();
     }
@@ -143,10 +144,7 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
         const SizedBox(height: 16),
         Text(
           'Please start the session from the teacher app',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.white.withOpacity(0.7),
-          ),
+          style: TextStyle(fontSize: 18, color: Colors.white.withOpacity(0.7)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -171,10 +169,7 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
         const SizedBox(height: 24),
         const Text(
           'Token refreshes automatically',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.white70),
         ),
       ],
     );
@@ -242,16 +237,13 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
     final timeLeft = classData.end.difference(DateTime.now());
     final hours = timeLeft.inHours;
     final minutes = timeLeft.inMinutes % 60;
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
         ),
       ),
       child: Row(
@@ -271,10 +263,7 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
               const SizedBox(height: 4),
               Text(
                 '${hours}h ${minutes}m left',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),
@@ -291,10 +280,7 @@ class _AttendanceDisplayPageState extends ConsumerState<AttendanceDisplayPage> {
               ),
               const Text(
                 'Present',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),

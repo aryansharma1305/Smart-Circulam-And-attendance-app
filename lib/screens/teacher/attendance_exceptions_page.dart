@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../models/attendance_exception.dart';
+import '../../controllers/exception_controller.dart';
 
 class AttendanceExceptionsPage extends ConsumerStatefulWidget {
   const AttendanceExceptionsPage({super.key});
@@ -18,8 +19,6 @@ class _AttendanceExceptionsPageState
     extends ConsumerState<AttendanceExceptionsPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  List<AttendanceException> _allExceptions = [];
-  List<AttendanceException> _filteredExceptions = [];
   String _selectedFilter = 'all';
   String _searchQuery = '';
 
@@ -27,7 +26,6 @@ class _AttendanceExceptionsPageState
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _loadMockExceptions();
     _tabController.addListener(_onTabChanged);
   }
 
@@ -35,91 +33,6 @@ class _AttendanceExceptionsPageState
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _loadMockExceptions() {
-    final now = DateTime.now();
-    _allExceptions = [
-      AttendanceException(
-        id: '1',
-        sessionId: 'session_1',
-        studentId: 'student_1',
-        studentName: 'John Doe',
-        studentEmail: 'john.doe@university.edu',
-        type: ExceptionType.lateArrival,
-        status: ExceptionStatus.pending,
-        reason:
-            'Bus was delayed due to traffic jam on main road. Have bus ticket as proof.',
-        supportingDocument: 'bus_ticket_001.jpg',
-        requestedAt: now.subtract(const Duration(hours: 2)),
-        originalStatus: 'absent',
-        requestedStatus: 'late',
-      ),
-      AttendanceException(
-        id: '2',
-        sessionId: 'session_2',
-        studentId: 'student_2',
-        studentName: 'Jane Smith',
-        studentEmail: 'jane.smith@university.edu',
-        type: ExceptionType.medicalLeave,
-        status: ExceptionStatus.underReview,
-        reason: 'Had to visit doctor for emergency dental treatment.',
-        supportingDocument: 'medical_certificate.pdf',
-        requestedAt: now.subtract(const Duration(days: 1)),
-        originalStatus: 'absent',
-        requestedStatus: 'excused',
-      ),
-      AttendanceException(
-        id: '3',
-        sessionId: 'session_3',
-        studentId: 'student_3',
-        studentName: 'Mike Johnson',
-        studentEmail: 'mike.johnson@university.edu',
-        type: ExceptionType.technicalIssue,
-        status: ExceptionStatus.pending,
-        reason:
-            'QR scanner was not working on my phone. Tried multiple times but failed.',
-        requestedAt: now.subtract(const Duration(hours: 6)),
-        originalStatus: 'absent',
-        requestedStatus: 'present',
-      ),
-      AttendanceException(
-        id: '4',
-        sessionId: 'session_4',
-        studentId: 'student_4',
-        studentName: 'Sarah Wilson',
-        studentEmail: 'sarah.wilson@university.edu',
-        type: ExceptionType.wronglyMarkedAbsent,
-        status: ExceptionStatus.approved,
-        reason:
-            'I was present in class but my attendance was marked absent by mistake.',
-        requestedAt: now.subtract(const Duration(days: 2)),
-        reviewedAt: now.subtract(const Duration(hours: 12)),
-        reviewedBy: 'teacher_1',
-        reviewerComments:
-            'Verified with class video recording. Student was present.',
-        originalStatus: 'absent',
-        requestedStatus: 'present',
-      ),
-      AttendanceException(
-        id: '5',
-        sessionId: 'session_5',
-        studentId: 'student_5',
-        studentName: 'David Brown',
-        studentEmail: 'david.brown@university.edu',
-        type: ExceptionType.personalLeave,
-        status: ExceptionStatus.rejected,
-        reason: 'Had to attend family function.',
-        requestedAt: now.subtract(const Duration(days: 3)),
-        reviewedAt: now.subtract(const Duration(days: 1)),
-        reviewedBy: 'teacher_1',
-        reviewerComments:
-            'Personal functions are not valid reasons for absence without prior approval.',
-        originalStatus: 'absent',
-        requestedStatus: 'excused',
-      ),
-    ];
-    _filterExceptions();
   }
 
   void _onTabChanged() {
@@ -137,48 +50,52 @@ class _AttendanceExceptionsPageState
         _selectedFilter = 'rejected';
         break;
     }
-    _filterExceptions();
+    setState(() {});
   }
 
-  void _filterExceptions() {
-    setState(() {
-      _filteredExceptions = _allExceptions.where((exception) {
-        // Filter by status
-        bool statusMatch = true;
-        switch (_selectedFilter) {
-          case 'pending':
-            statusMatch = exception.isPending || exception.isUnderReview;
-            break;
-          case 'approved':
-            statusMatch = exception.isApproved;
-            break;
-          case 'rejected':
-            statusMatch = exception.isRejected;
-            break;
-        }
+  List<AttendanceException> _applyFilter(List<AttendanceException> all) {
+    final filtered = all.where((exception) {
+      // Filter by status
+      bool statusMatch = true;
+      switch (_selectedFilter) {
+        case 'pending':
+          statusMatch = exception.isPending || exception.isUnderReview;
+          break;
+        case 'approved':
+          statusMatch = exception.isApproved;
+          break;
+        case 'rejected':
+          statusMatch = exception.isRejected;
+          break;
+      }
 
-        // Filter by search query
-        bool searchMatch =
-            _searchQuery.isEmpty ||
-            exception.studentName.toLowerCase().contains(
-              _searchQuery.toLowerCase(),
-            ) ||
-            exception.reason.toLowerCase().contains(_searchQuery.toLowerCase());
+      // Filter by search query
+      bool searchMatch =
+          _searchQuery.isEmpty ||
+          exception.studentName.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
+          exception.reason.toLowerCase().contains(_searchQuery.toLowerCase());
 
-        return statusMatch && searchMatch;
-      }).toList();
+      return statusMatch && searchMatch;
+    }).toList();
 
-      // Sort by urgency and date
-      _filteredExceptions.sort((a, b) {
-        if (a.isUrgent && !b.isUrgent) return -1;
-        if (!a.isUrgent && b.isUrgent) return 1;
-        return b.requestedAt.compareTo(a.requestedAt);
-      });
+    // Sort by urgency and date
+    filtered.sort((a, b) {
+      if (a.isUrgent && !b.isUrgent) return -1;
+      if (!a.isUrgent && b.isUrgent) return 1;
+      return b.requestedAt.compareTo(a.requestedAt);
     });
+
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
+    final allAsync = ref.watch(exceptionControllerProvider);
+    final all = allAsync.value ?? [];
+    final filtered = _applyFilter(all);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -205,18 +122,18 @@ class _AttendanceExceptionsPageState
           unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
           indicatorColor: Colors.white,
           tabs: [
-            Tab(text: 'All (${_allExceptions.length})'),
+            Tab(text: 'All (${all.length})'),
             Tab(
               text:
-                  'Pending (${_allExceptions.where((e) => e.isPending || e.isUnderReview).length})',
+                  'Pending (${all.where((e) => e.isPending || e.isUnderReview).length})',
             ),
             Tab(
               text:
-                  'Approved (${_allExceptions.where((e) => e.isApproved).length})',
+                  'Approved (${all.where((e) => e.isApproved).length})',
             ),
             Tab(
               text:
-                  'Rejected (${_allExceptions.where((e) => e.isRejected).length})',
+                  'Rejected (${all.where((e) => e.isRejected).length})',
             ),
           ],
         ),
@@ -224,15 +141,15 @@ class _AttendanceExceptionsPageState
       body: Column(
         children: [
           _buildSearchBar(),
-          _buildStatsCards(),
+          _buildStatsCards(all),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildExceptionsList(),
-                _buildExceptionsList(),
-                _buildExceptionsList(),
-                _buildExceptionsList(),
+                _buildExceptionsList(filtered),
+                _buildExceptionsList(filtered),
+                _buildExceptionsList(filtered),
+                _buildExceptionsList(filtered),
               ],
             ),
           ),
@@ -257,8 +174,9 @@ class _AttendanceExceptionsPageState
       ),
       child: TextField(
         onChanged: (value) {
-          _searchQuery = value;
-          _filterExceptions();
+          setState(() {
+            _searchQuery = value;
+          });
         },
         decoration: InputDecoration(
           hintText: 'Search by student name or reason...',
@@ -273,12 +191,12 @@ class _AttendanceExceptionsPageState
     );
   }
 
-  Widget _buildStatsCards() {
-    final pendingCount = _allExceptions
+  Widget _buildStatsCards(List<AttendanceException> all) {
+    final pendingCount = all
         .where((e) => e.isPending || e.isUnderReview)
         .length;
-    final urgentCount = _allExceptions.where((e) => e.isUrgent).length;
-    final todayCount = _allExceptions
+    final urgentCount = all.where((e) => e.isUrgent).length;
+    final todayCount = all
         .where((e) => DateTime.now().difference(e.requestedAt).inDays == 0)
         .length;
 
@@ -363,16 +281,16 @@ class _AttendanceExceptionsPageState
     );
   }
 
-  Widget _buildExceptionsList() {
-    if (_filteredExceptions.isEmpty) {
+  Widget _buildExceptionsList(List<AttendanceException> filtered) {
+    if (filtered.isEmpty) {
       return _buildEmptyState();
     }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _filteredExceptions.length,
+      itemCount: filtered.length,
       itemBuilder: (context, index) {
-        final exception = _filteredExceptions[index];
+        final exception = filtered[index];
         return _buildExceptionCard(exception, index);
       },
     );
@@ -825,20 +743,11 @@ class _AttendanceExceptionsPageState
     bool isApproval,
     String comments,
   ) {
-    setState(() {
-      final index = _allExceptions.indexWhere((e) => e.id == exception.id);
-      if (index != -1) {
-        _allExceptions[index] = exception.copyWith(
-          status: isApproval
-              ? ExceptionStatus.approved
-              : ExceptionStatus.rejected,
-          reviewedAt: DateTime.now(),
-          reviewedBy: 'current_teacher_id',
-          reviewerComments: comments.isNotEmpty ? comments : null,
-        );
-      }
-    });
-    _filterExceptions();
+    ref.read(exceptionControllerProvider.notifier).review(
+      exception.id,
+      isApproval ? ExceptionStatus.approved : ExceptionStatus.rejected,
+      comments: comments.isNotEmpty ? comments : null,
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -947,7 +856,6 @@ class _AttendanceExceptionsPageState
                   _selectedFilter = 'all';
                   _tabController.index = 0;
                 });
-                _filterExceptions();
                 Navigator.pop(context);
               },
               child: const Text('Reset Filters'),

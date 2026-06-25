@@ -3,29 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../models/announcement.dart';
+import '../../controllers/announcement_controller.dart';
 import 'create_announcement_page.dart';
-
-class Announcement {
-  final String id;
-  final String course;
-  final String section;
-  final String title;
-  final String message;
-  final DateTime sentAt;
-  final bool isScheduled;
-  final String? attachment;
-
-  Announcement({
-    required this.id,
-    required this.course,
-    required this.section,
-    required this.title,
-    required this.message,
-    required this.sentAt,
-    this.isScheduled = false,
-    this.attachment,
-  });
-}
 
 class AnnouncePage extends ConsumerStatefulWidget {
   const AnnouncePage({super.key});
@@ -35,47 +15,13 @@ class AnnouncePage extends ConsumerStatefulWidget {
 }
 
 class _AnnouncePageState extends ConsumerState<AnnouncePage> {
-  List<Announcement> announcements = [];
   String searchQuery = '';
   String selectedFilter = 'All';
 
   final List<String> filters = ['All', 'DSA', 'DBMS', 'OS', 'Networks'];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadMockData();
-  }
-
-  void _loadMockData() {
-    final now = DateTime.now();
-
-    announcements = [
-      Announcement(
-        id: '1',
-        course: 'DSA',
-        section: 'Sec A',
-        title: 'Assignment 3 Submission',
-        message:
-            'Please submit Assignment 3 by Friday. Late submissions will not be accepted.',
-        sentAt: now.subtract(const Duration(hours: 2)),
-        attachment: 'assignment3.pdf',
-      ),
-      Announcement(
-        id: '2',
-        course: 'DBMS',
-        section: 'Sec B',
-        title: 'Mid-term Exam Schedule',
-        message:
-            'Mid-term exam will be held on March 15th. Please bring your student ID.',
-        sentAt: now.subtract(const Duration(days: 1)),
-        isScheduled: true,
-      ),
-    ];
-  }
-
-  List<Announcement> get filteredAnnouncements {
-    var filtered = announcements;
+  List<Announcement> _applyFilters(List<Announcement> all) {
+    var filtered = all;
 
     if (selectedFilter != 'All') {
       filtered = filtered.where((a) => a.course == selectedFilter).toList();
@@ -96,6 +42,10 @@ class _AnnouncePageState extends ConsumerState<AnnouncePage> {
 
   @override
   Widget build(BuildContext context) {
+    final announcementsAsync = ref.watch(announcementControllerProvider);
+    final all = announcementsAsync.value ?? [];
+    final filtered = _applyFilters(all);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -118,9 +68,9 @@ class _AnnouncePageState extends ConsumerState<AnnouncePage> {
         children: [
           _buildSearchAndFilter(),
           Expanded(
-            child: filteredAnnouncements.isEmpty
+            child: filtered.isEmpty
                 ? _buildEmptyState()
-                : _buildAnnouncementsList(),
+                : _buildAnnouncementsList(filtered),
           ),
         ],
       ),
@@ -221,12 +171,12 @@ class _AnnouncePageState extends ConsumerState<AnnouncePage> {
     );
   }
 
-  Widget _buildAnnouncementsList() {
+  Widget _buildAnnouncementsList(List<Announcement> filtered) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: filteredAnnouncements.length,
+      itemCount: filtered.length,
       itemBuilder: (context, index) {
-        final announcement = filteredAnnouncements[index];
+        final announcement = filtered[index];
         return _buildAnnouncementCard(announcement);
       },
     );
@@ -427,9 +377,7 @@ class _AnnouncePageState extends ConsumerState<AnnouncePage> {
   }
 
   void _deleteAnnouncement(Announcement announcement) {
-    setState(() {
-      announcements.removeWhere((a) => a.id == announcement.id);
-    });
+    ref.read(announcementControllerProvider.notifier).delete(announcement.id);
 
     ScaffoldMessenger.of(
       context,

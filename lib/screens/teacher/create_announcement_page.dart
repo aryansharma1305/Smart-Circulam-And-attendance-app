@@ -7,15 +7,17 @@ class CreateAnnouncementPage extends ConsumerStatefulWidget {
   const CreateAnnouncementPage({super.key});
 
   @override
-  ConsumerState<CreateAnnouncementPage> createState() => _CreateAnnouncementPageState();
+  ConsumerState<CreateAnnouncementPage> createState() =>
+      _CreateAnnouncementPageState();
 }
 
-class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage> {
+class _CreateAnnouncementPageState
+    extends ConsumerState<CreateAnnouncementPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
   final _attachmentController = TextEditingController();
-  
+
   String selectedCourse = 'DSA';
   String selectedSection = 'Sec A';
   bool isScheduled = false;
@@ -117,13 +119,13 @@ class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage>
                   decoration: const InputDecoration(
                     labelText: 'Course',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   items: courses.map((course) {
-                    return DropdownMenuItem(
-                      value: course,
-                      child: Text(course),
-                    );
+                    return DropdownMenuItem(value: course, child: Text(course));
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
@@ -139,7 +141,10 @@ class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage>
                   decoration: const InputDecoration(
                     labelText: 'Section',
                     border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   items: sections.map((section) {
                     return DropdownMenuItem(
@@ -314,11 +319,11 @@ class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage>
           SwitchListTile(
             title: const Text('Schedule for later'),
             subtitle: Text(
-              isScheduled 
-                ? scheduledDate != null 
-                  ? 'Scheduled for ${scheduledDate!.day}/${scheduledDate!.month}/${scheduledDate!.year}'
-                  : 'Select date and time'
-                : 'Send immediately',
+              isScheduled
+                  ? scheduledDate != null
+                        ? 'Scheduled for ${scheduledDate!.day}/${scheduledDate!.month}/${scheduledDate!.year}'
+                        : 'Select date and time'
+                  : 'Send immediately',
             ),
             value: isScheduled,
             onChanged: (value) {
@@ -336,9 +341,9 @@ class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage>
               onPressed: _selectScheduleDate,
               icon: const Icon(Icons.calendar_today),
               label: Text(
-                scheduledDate != null 
-                  ? 'Change Date & Time'
-                  : 'Select Date & Time',
+                scheduledDate != null
+                    ? 'Change Date & Time'
+                    : 'Select Date & Time',
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
@@ -419,9 +424,9 @@ class _CreateAnnouncementPageState extends ConsumerState<CreateAnnouncementPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isScheduled 
-              ? 'Announcement scheduled for ${scheduledDate!.day}/${scheduledDate!.month}/${scheduledDate!.year}'
-              : 'Announcement sent to $selectedSection',
+            isScheduled
+                ? 'Announcement scheduled for ${scheduledDate!.day}/${scheduledDate!.month}/${scheduledDate!.year}'
+                : 'Announcement sent to $selectedSection',
           ),
           backgroundColor: Colors.green,
         ),

@@ -725,4 +725,3 @@ class SessionData {
     required this.attendancePercentage,
   });
 }
-
