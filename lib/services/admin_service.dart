@@ -17,6 +17,7 @@ class AdminService {
   };
 
   final List<Map<String, dynamic>> _auditLogs = [];
+  final Set<String> _importedEmails = {};
   final StreamController<List<Map<String, dynamic>>> _auditStreamCtrl =
       StreamController<List<Map<String, dynamic>>>.broadcast();
 
@@ -57,7 +58,8 @@ class AdminService {
     addAuditLog('Institute settings updated');
   }
 
-  Stream<List<Map<String, dynamic>>> watchAuditLogs() => _auditStreamCtrl.stream;
+  Stream<List<Map<String, dynamic>>> watchAuditLogs() =>
+      _auditStreamCtrl.stream;
 
   Future<List<Map<String, dynamic>>> getAuditLogs() async {
     return List<Map<String, dynamic>>.from(_auditLogs.reversed);
@@ -96,7 +98,6 @@ class AdminService {
     addAuditLog('Timetable entry added: ${entry['course']}');
   }
 
-  // Bulk import (demo): parse CSV-like text
   Future<List<Map<String, String>>> previewBulkImport(String csvText) async {
     final lines = csvText.trim().split(RegExp(r'\r?\n'));
     if (lines.isEmpty) return [];
@@ -108,13 +109,32 @@ class AdminService {
       for (var j = 0; j < headers.length && j < values.length; j++) {
         row[headers[j]] = values[j];
       }
+      final errors = <String>[];
+      final email = row['email']?.toLowerCase() ?? '';
+      final role = row['role']?.toLowerCase() ?? '';
+      if ((row['name'] ?? '').isEmpty) errors.add('name is required');
+      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+        errors.add('invalid email');
+      }
+      if (!{'student', 'teacher'}.contains(role)) {
+        errors.add('role must be student or teacher');
+      }
+      if (_importedEmails.contains(email)) errors.add('already imported');
+      row['_errors'] = errors.join('; ');
+      row['_status'] = errors.isEmpty ? 'valid' : 'invalid';
       rows.add(row);
     }
     return rows;
   }
 
   Future<void> commitBulkImport(List<Map<String, String>> rows) async {
-    // Demo: just log the import
+    final invalid = rows.where((row) => row['_status'] != 'valid').length;
+    if (invalid > 0) {
+      throw FormatException('$invalid import rows contain validation errors.');
+    }
+    for (final row in rows) {
+      _importedEmails.add(row['email']!.toLowerCase());
+    }
     addAuditLog('Bulk import committed: ${rows.length} rows');
   }
 
@@ -122,5 +142,3 @@ class AdminService {
     _auditStreamCtrl.close();
   }
 }
-
-

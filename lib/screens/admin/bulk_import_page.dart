@@ -94,7 +94,17 @@ class _BulkImportPageState extends ConsumerState<BulkImportPage> {
                           leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(row['name'] ?? ''),
                           subtitle: Text(
-                            '${row['email'] ?? ''} • ${row['role'] ?? ''}',
+                            '${row['email'] ?? ''} • ${row['role'] ?? ''}'
+                            '${(row['_errors'] ?? '').isEmpty ? '' : '\n${row['_errors']}'}',
+                          ),
+                          isThreeLine: (row['_errors'] ?? '').isNotEmpty,
+                          trailing: Icon(
+                            row['_status'] == 'valid'
+                                ? Icons.check_circle
+                                : Icons.error,
+                            color: row['_status'] == 'valid'
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         );
                       },
