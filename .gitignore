@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase — contain real API keys, manage via CI secrets
+google-services.json
+GoogleService-Info.plist
+lib/firebase_options_staging.dart
+lib/firebase_options_prod.dart
+
+# Cloud Functions
+functions/node_modules/
+functions/lib/

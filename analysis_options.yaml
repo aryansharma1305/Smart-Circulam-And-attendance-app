@@ -9,6 +9,55 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+# Phase 1 keeps the route-reachable application under analysis while legacy
+# prototypes are reviewed for migration or deletion. These files are not
+# imported by lib/main.dart and several depend on packages/APIs that were
+# removed from the runnable demo.
+analyzer:
+  exclude:
+    - lib/core/router_minimal.dart
+    - lib/main_simple.dart
+    - lib/models/analytics_models.dart
+    - lib/models/attendance.dart
+    - lib/models/attendance_record.dart
+    - lib/models/class.dart
+    - lib/models/counselling_session.dart
+    - lib/models/course.dart
+    - lib/models/room.dart
+    - lib/models/timetable.dart
+    - lib/providers/attendance_provider.dart
+    - lib/providers/notification_provider.dart
+    - lib/providers/storage_provider.dart
+    - lib/providers/task_provider.dart
+    - lib/providers/timetable_provider.dart
+    - lib/screens/common/notifications_page.dart
+    - lib/screens/counsellor/**
+    - lib/screens/role_navigation_demo.dart
+    - lib/screens/student/multi_modal_attendance_page.dart
+    - lib/screens/teacher/analytics_dashboard_page.dart
+    - lib/screens/teacher/start_session_page.dart
+    - lib/screens/teacher/subject_analytics_page.dart
+    - lib/services/analytics_service.dart
+    - lib/services/attendance_service.dart
+    - lib/services/background_sync_service.dart
+    - lib/services/csv_export_service.dart
+    - lib/services/demo_seed_service.dart
+    - lib/services/firebase_attendance_service.dart
+    - lib/services/firebase_attendance_service_demo.dart
+    - lib/services/firebase_service.dart
+    - lib/services/notification_demo_service.dart
+    - lib/services/notification_service.dart
+    - lib/services/offline_storage_service.dart
+    - lib/services/simple_storage_service.dart
+    - lib/services/storage_service.dart
+    - lib/services/task_service.dart
+    - lib/services/timetable_service.dart
+    - lib/utils/theme_utils.dart
+    - lib/widgets/analytics_chart_widget.dart
+    - lib/widgets/enhanced_qr_scanner_widget.dart
+    - lib/widgets/export_dialog_widget.dart
+    - lib/widgets/qr_generator_widget.dart
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
