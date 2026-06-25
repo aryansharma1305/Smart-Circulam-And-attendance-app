@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../models/in_app_notification.dart';
+import '../../providers/notification_provider.dart';
 
 class StudentNotificationsPage extends ConsumerStatefulWidget {
   const StudentNotificationsPage({super.key});
@@ -139,19 +141,28 @@ class _StudentNotificationsPageState
   }
 
   Widget _buildNotificationsList() {
-    final notifications = _getFilteredNotifications();
+    final notificationsAsync = ref.watch(inAppNotificationsProvider);
 
-    if (notifications.isEmpty) {
-      return _buildEmptyState();
-    }
+    return notificationsAsync.when(
+      data: (allNotifications) {
+        final notifications = _getFilteredNotifications(allNotifications);
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: notifications.length,
-      itemBuilder: (context, index) {
-        final notification = notifications[index];
-        return _buildNotificationCard(notification);
+        if (notifications.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: notifications.length,
+          itemBuilder: (context, index) {
+            final notification = notifications[index];
+            return _buildNotificationCard(notification);
+          },
+        );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) =>
+          Center(child: Text('Unable to load notifications: $error')),
     );
   }
 
@@ -187,7 +198,7 @@ class _StudentNotificationsPageState
         .slideY(begin: 0.3);
   }
 
-  Widget _buildNotificationCard(NotificationItem notification) {
+  Widget _buildNotificationCard(InAppNotification notification) {
     return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
@@ -216,13 +227,13 @@ class _StudentNotificationsPageState
               height: 40,
               decoration: BoxDecoration(
                 color: _getNotificationColor(
-                  notification.type,
+                  _filterType(notification.type),
                 ).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
-                _getNotificationIcon(notification.type),
-                color: _getNotificationColor(notification.type),
+                _getNotificationIcon(_filterType(notification.type)),
+                color: _getNotificationColor(_filterType(notification.type)),
                 size: 20,
               ),
             ),
@@ -257,7 +268,7 @@ class _StudentNotificationsPageState
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatTime(notification.timestamp),
+                      _formatTime(notification.createdAt),
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textHintColor,
@@ -278,7 +289,7 @@ class _StudentNotificationsPageState
                 ),
               ],
             ),
-            trailing: notification.action != null
+            trailing: notification.actionRoute != null
                 ? IconButton(
                     onPressed: () => _handleNotificationAction(notification),
                     icon: Icon(
@@ -290,7 +301,7 @@ class _StudentNotificationsPageState
                 : null,
             onTap: () {
               _markAsRead(notification);
-              if (notification.action != null) {
+              if (notification.actionRoute != null) {
                 _handleNotificationAction(notification);
               }
             },
@@ -301,11 +312,12 @@ class _StudentNotificationsPageState
         .slideY(begin: 0.3);
   }
 
-  List<NotificationItem> _getFilteredNotifications() {
-    final allNotifications = _getMockNotifications();
-
+  List<InAppNotification> _getFilteredNotifications(
+    List<InAppNotification> allNotifications,
+  ) {
     var filtered = allNotifications.where((notification) {
-      if (_selectedFilter != 'all' && notification.type != _selectedFilter) {
+      if (_selectedFilter != 'all' &&
+          _filterType(notification.type) != _selectedFilter) {
         return false;
       }
       if (_showUnreadOnly && notification.isRead) {
@@ -315,87 +327,24 @@ class _StudentNotificationsPageState
     }).toList();
 
     // Sort by timestamp (newest first)
-    filtered.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return filtered;
   }
 
-  List<NotificationItem> _getMockNotifications() {
-    final now = DateTime.now();
-    return [
-      NotificationItem(
-        id: '1',
-        title: 'Attendance Marked Successfully',
-        message: 'You have been marked present for Data Structures class',
-        type: 'attendance',
-        timestamp: now.subtract(const Duration(minutes: 5)),
-        isRead: false,
-        action: () => context.go('/student/ledger'),
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Class Starting Soon',
-        message: 'Database Management class starts in 10 minutes',
-        type: 'classes',
-        timestamp: now.subtract(const Duration(minutes: 15)),
-        isRead: false,
-        action: () => context.go('/student/timetable'),
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Goal Achievement',
-        message: 'Congratulations! You completed your weekly study goal',
-        type: 'goals',
-        timestamp: now.subtract(const Duration(hours: 1)),
-        isRead: true,
-        action: () => context.go('/student/goals'),
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'Free Period Task Available',
-        message: 'You have 30 minutes free. Complete a quick math problem set?',
-        type: 'goals',
-        timestamp: now.subtract(const Duration(hours: 2)),
-        isRead: true,
-        action: () => context.go('/student/coach'),
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'System Update',
-        message: 'New features added to the attendance system',
-        type: 'system',
-        timestamp: now.subtract(const Duration(days: 1)),
-        isRead: true,
-        action: null,
-      ),
-      NotificationItem(
-        id: '6',
-        title: 'Attendance Reminder',
-        message: 'Don\'t forget to mark attendance for your next class',
-        type: 'attendance',
-        timestamp: now.subtract(const Duration(days: 1, hours: 2)),
-        isRead: true,
-        action: () => context.go('/student/attendance'),
-      ),
-      NotificationItem(
-        id: '7',
-        title: 'Weekly Report Ready',
-        message: 'Your weekly attendance report is now available',
-        type: 'system',
-        timestamp: now.subtract(const Duration(days: 2)),
-        isRead: true,
-        action: () => context.go('/student/reports'),
-      ),
-      NotificationItem(
-        id: '8',
-        title: 'Class Cancelled',
-        message: 'Mathematics class scheduled for today has been cancelled',
-        type: 'classes',
-        timestamp: now.subtract(const Duration(days: 3)),
-        isRead: true,
-        action: () => context.go('/student/timetable'),
-      ),
-    ];
+  String _filterType(InAppNotificationType type) {
+    switch (type) {
+      case InAppNotificationType.attendance:
+      case InAppNotificationType.exception:
+        return 'attendance';
+      case InAppNotificationType.classUpdate:
+      case InAppNotificationType.announcement:
+        return 'classes';
+      case InAppNotificationType.goal:
+        return 'goals';
+      case InAppNotificationType.system:
+        return 'system';
+    }
   }
 
   IconData _getNotificationIcon(String type) {
@@ -445,19 +394,13 @@ class _StudentNotificationsPageState
     }
   }
 
-  void _markAsRead(NotificationItem notification) {
-    setState(() {
-      notification.isRead = true;
-    });
+  void _markAsRead(InAppNotification notification) {
+    if (notification.isRead) return;
+    ref.read(markInAppNotificationReadProvider(notification.id));
   }
 
   void _markAllAsRead() {
-    setState(() {
-      // In a real app, this would update the backend
-      for (var notification in _getMockNotifications()) {
-        notification.isRead = true;
-      }
-    });
+    ref.read(markAllInAppNotificationsReadProvider.future);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('All notifications marked as read'),
@@ -466,9 +409,10 @@ class _StudentNotificationsPageState
     );
   }
 
-  void _handleNotificationAction(NotificationItem notification) {
-    if (notification.action != null) {
-      notification.action!();
+  void _handleNotificationAction(InAppNotification notification) {
+    final route = notification.actionRoute;
+    if (route != null) {
+      context.go(route);
     }
   }
 
@@ -506,24 +450,4 @@ class _StudentNotificationsPageState
       ),
     );
   }
-}
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String message;
-  final String type;
-  final DateTime timestamp;
-  bool isRead;
-  final VoidCallback? action;
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.type,
-    required this.timestamp,
-    this.isRead = false,
-    this.action,
-  });
 }

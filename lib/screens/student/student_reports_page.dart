@@ -43,29 +43,29 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
           children: [
             // Report Type Selector
             _buildReportTypeSelector(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Period Selector
             _buildPeriodSelector(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Date Range Selector
             _buildDateRangeSelector(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Generate Report Button
             _buildGenerateButton(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Report Preview
             _buildReportPreview(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Available Reports
             _buildAvailableReports(),
           ],
@@ -76,43 +76,58 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
 
   Widget _buildReportTypeSelector() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Report Type',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildReportTypeChip('attendance', 'Attendance Report', Icons.assignment),
-              _buildReportTypeChip('timetable', 'Timetable Report', Icons.schedule),
-              _buildReportTypeChip('goals', 'Goals Progress', Icons.track_changes),
-              _buildReportTypeChip('routine', 'Daily Routine', Icons.today),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Type',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _buildReportTypeChip(
+                    'attendance',
+                    'Attendance Report',
+                    Icons.assignment,
+                  ),
+                  _buildReportTypeChip(
+                    'timetable',
+                    'Timetable Report',
+                    Icons.schedule,
+                  ),
+                  _buildReportTypeChip(
+                    'goals',
+                    'Goals Progress',
+                    Icons.track_changes,
+                  ),
+                  _buildReportTypeChip('routine', 'Daily Routine', Icons.today),
+                ],
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildReportTypeChip(String type, String label, IconData icon) {
@@ -157,44 +172,47 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
 
   Widget _buildPeriodSelector() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Time Period',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildPeriodChip('week', 'This Week'),
-              const SizedBox(width: 12),
-              _buildPeriodChip('month', 'This Month'),
-              const SizedBox(width: 12),
-              _buildPeriodChip('semester', 'This Semester'),
-              const SizedBox(width: 12),
-              _buildPeriodChip('custom', 'Custom Range'),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Time Period',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildPeriodChip('week', 'This Week'),
+                  const SizedBox(width: 12),
+                  _buildPeriodChip('month', 'This Month'),
+                  const SizedBox(width: 12),
+                  _buildPeriodChip('semester', 'This Semester'),
+                  const SizedBox(width: 12),
+                  _buildPeriodChip('custom', 'Custom Range'),
+                ],
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildPeriodChip(String period, String label) {
@@ -228,46 +246,50 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
 
   Widget _buildDateRangeSelector() {
     if (_selectedPeriod != 'custom') return const SizedBox.shrink();
-    
+
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Date Range',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDateField('From', _selectedDate),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDateField('To', _selectedDate.add(const Duration(days: 7))),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Date Range',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _buildDateField('From', _selectedDate)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDateField(
+                      'To',
+                      _selectedDate.add(const Duration(days: 7)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildDateField(String label, DateTime date) {
@@ -305,7 +327,11 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, size: 20, color: AppTheme.primaryColor),
+                Icon(
+                  Icons.calendar_today,
+                  size: 20,
+                  color: AppTheme.primaryColor,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   DateFormat('MMM d, y').format(date),
@@ -324,60 +350,63 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
 
   Widget _buildGenerateButton() {
     return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton.icon(
-        onPressed: _generateReport,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: _generateReport,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 2,
+            ),
+            icon: const Icon(Icons.file_download, size: 20),
+            label: const Text(
+              'Generate Report',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
-          elevation: 2,
-        ),
-        icon: const Icon(Icons.file_download, size: 20),
-        label: const Text(
-          'Generate Report',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildReportPreview() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Report Preview',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Preview',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildPreviewContent(),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildPreviewContent(),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildPreviewContent() {
@@ -450,10 +479,7 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textSecondaryColor,
-            ),
+            style: TextStyle(fontSize: 14, color: AppTheme.textSecondaryColor),
           ),
           Text(
             value,
@@ -470,64 +496,73 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
 
   Widget _buildAvailableReports() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Available Reports',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimaryColor,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Available Reports',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildReportItem(
+                'Weekly Attendance Report',
+                'Detailed attendance summary for the week',
+                'PDF',
+                '2.3 MB',
+                Icons.assignment,
+              ),
+              _buildReportItem(
+                'Monthly Progress Report',
+                'Comprehensive monthly progress analysis',
+                'PDF',
+                '4.1 MB',
+                Icons.analytics,
+              ),
+              _buildReportItem(
+                'Goals Achievement Report',
+                'Progress towards your academic goals',
+                'PDF',
+                '1.8 MB',
+                Icons.track_changes,
+              ),
+              _buildReportItem(
+                'Daily Routine Report',
+                'Your daily routine and task completion',
+                'PDF',
+                '1.2 MB',
+                Icons.today,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildReportItem(
-            'Weekly Attendance Report',
-            'Detailed attendance summary for the week',
-            'PDF',
-            '2.3 MB',
-            Icons.assignment,
-          ),
-          _buildReportItem(
-            'Monthly Progress Report',
-            'Comprehensive monthly progress analysis',
-            'PDF',
-            '4.1 MB',
-            Icons.analytics,
-          ),
-          _buildReportItem(
-            'Goals Achievement Report',
-            'Progress towards your academic goals',
-            'PDF',
-            '1.8 MB',
-            Icons.track_changes,
-          ),
-          _buildReportItem(
-            'Daily Routine Report',
-            'Your daily routine and task completion',
-            'PDF',
-            '1.2 MB',
-            Icons.today,
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
-  Widget _buildReportItem(String title, String description, String format, String size, IconData icon) {
+  Widget _buildReportItem(
+    String title,
+    String description,
+    String format,
+    String size,
+    IconData icon,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -548,11 +583,7 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
               color: AppTheme.primaryColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 20,
-            ),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -579,7 +610,10 @@ class _StudentReportsPageState extends ConsumerState<StudentReportsPage> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.accentColor,
                         borderRadius: BorderRadius.circular(4),

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/announcement.dart';
 import '../../providers/notification_provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../controllers/auth_controller.dart';
 
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({Key? key}) : super(key: key);
@@ -48,19 +48,16 @@ class NotificationsPage extends ConsumerWidget {
             itemCount: announcements.length,
             itemBuilder: (context, index) {
               final announcement = announcements[index];
-              final timestamp = announcement['createdAt'] as Timestamp?;
-              final DateTime dateTime = timestamp != null
-                  ? timestamp.toDate()
-                  : DateTime.now();
+              final DateTime dateTime = announcement.sentAt;
               final formattedDate = DateFormat(
                 'MMM d, yyyy • h:mm a',
               ).format(dateTime);
 
               // Check if the current user has read this announcement
-              final List<dynamic> readBy = announcement['readBy'] ?? [];
               final currentUserId = ref.read(currentUserProvider)?.uid ?? '';
               final bool isRead =
-                  currentUserId.isNotEmpty && readBy.contains(currentUserId);
+                  currentUserId.isNotEmpty &&
+                  announcement.hasBeenReadBy(currentUserId);
 
               return _buildAnnouncementCard(
                 context,
@@ -82,15 +79,17 @@ class NotificationsPage extends ConsumerWidget {
   Widget _buildAnnouncementCard(
     BuildContext context,
     WidgetRef ref,
-    Map<String, dynamic> announcement,
+    Announcement announcement,
     String formattedDate,
     bool isRead,
   ) {
-    final title = announcement['title'] as String;
-    final body = announcement['body'] as String;
-    final senderName = announcement['senderName'] as String;
-    final courseName = announcement['courseName'] as String?;
-    final id = announcement['id'] as String;
+    final title = announcement.title;
+    final body = announcement.message;
+    final senderName = announcement.senderName;
+    final courseName = announcement.course.isNotEmpty
+        ? '${announcement.course} ${announcement.section}'.trim()
+        : null;
+    final id = announcement.id;
 
     // Mark as read when opened if not already read
     if (!isRead) {

@@ -10,7 +10,8 @@ class StudentCalendarPage extends ConsumerStatefulWidget {
   const StudentCalendarPage({super.key});
 
   @override
-  ConsumerState<StudentCalendarPage> createState() => _StudentCalendarPageState();
+  ConsumerState<StudentCalendarPage> createState() =>
+      _StudentCalendarPageState();
 }
 
 class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
@@ -51,18 +52,9 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'month',
-                child: Text('Month View'),
-              ),
-              const PopupMenuItem(
-                value: 'week',
-                child: Text('Week View'),
-              ),
-              const PopupMenuItem(
-                value: 'day',
-                child: Text('Day View'),
-              ),
+              const PopupMenuItem(value: 'month', child: Text('Month View')),
+              const PopupMenuItem(value: 'week', child: Text('Week View')),
+              const PopupMenuItem(value: 'day', child: Text('Day View')),
             ],
             icon: Icon(Icons.view_module, color: AppTheme.primaryColor),
           ),
@@ -72,11 +64,9 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
         children: [
           // View Mode Selector
           _buildViewModeSelector(),
-          
+
           // Calendar
-          Expanded(
-            child: _buildCalendarContent(),
-          ),
+          Expanded(child: _buildCalendarContent()),
         ],
       ),
     );
@@ -84,27 +74,30 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
 
   Widget _buildViewModeSelector() {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildViewModeButton('month', 'Month', Icons.calendar_month),
-          _buildViewModeButton('week', 'Week', Icons.calendar_view_week),
-          _buildViewModeButton('day', 'Day', Icons.calendar_today),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+          child: Row(
+            children: [
+              _buildViewModeButton('month', 'Month', Icons.calendar_month),
+              _buildViewModeButton('week', 'Week', Icons.calendar_view_week),
+              _buildViewModeButton('day', 'Day', Icons.calendar_today),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildViewModeButton(String mode, String label, IconData icon) {
@@ -135,7 +128,9 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : AppTheme.textSecondaryColor,
+                  color: isSelected
+                      ? Colors.white
+                      : AppTheme.textSecondaryColor,
                 ),
               ),
             ],
@@ -160,326 +155,382 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
 
   Widget _buildMonthView() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: TableCalendar<String>(
-        firstDay: DateTime.utc(2020, 1, 1),
-        lastDay: DateTime.utc(2030, 12, 31),
-        focusedDay: _focusedDay,
-        calendarFormat: _calendarFormat,
-        eventLoader: _getEventsForDay,
-        startingDayOfWeek: StartingDayOfWeek.monday,
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: false,
-          weekendTextStyle: TextStyle(color: AppTheme.textSecondaryColor),
-          holidayTextStyle: TextStyle(color: AppTheme.absentColor),
-          defaultTextStyle: TextStyle(color: AppTheme.textPrimaryColor),
-          selectedTextStyle: const TextStyle(color: Colors.white),
-          todayTextStyle: TextStyle(color: AppTheme.primaryColor),
-          selectedDecoration: BoxDecoration(
-            color: AppTheme.primaryColor,
-            shape: BoxShape.circle,
-          ),
-          todayDecoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-          markerDecoration: BoxDecoration(
-            color: AppTheme.accentColor,
-            shape: BoxShape.circle,
-          ),
-        ),
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          titleTextStyle: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimaryColor,
-          ),
-          leftChevronIcon: Icon(Icons.chevron_left, color: AppTheme.primaryColor),
-          rightChevronIcon: Icon(Icons.chevron_right, color: AppTheme.primaryColor),
-        ),
-        onDaySelected: (selectedDay, focusedDay) {
-          if (!isSameDay(_selectedDay, selectedDay)) {
-            setState(() {
-              _selectedDay = selectedDay;
+          child: TableCalendar<String>(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            eventLoader: _getEventsForDay,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            calendarStyle: CalendarStyle(
+              outsideDaysVisible: false,
+              weekendTextStyle: TextStyle(color: AppTheme.textSecondaryColor),
+              holidayTextStyle: TextStyle(color: AppTheme.absentColor),
+              defaultTextStyle: TextStyle(color: AppTheme.textPrimaryColor),
+              selectedTextStyle: const TextStyle(color: Colors.white),
+              todayTextStyle: TextStyle(color: AppTheme.primaryColor),
+              selectedDecoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              markerDecoration: BoxDecoration(
+                color: AppTheme.accentColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              titleTextStyle: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimaryColor,
+              ),
+              leftChevronIcon: Icon(
+                Icons.chevron_left,
+                color: AppTheme.primaryColor,
+              ),
+              rightChevronIcon: Icon(
+                Icons.chevron_right,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            onDaySelected: (selectedDay, focusedDay) {
+              if (!isSameDay(_selectedDay, selectedDay)) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              }
+            },
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
-            });
-          }
-        },
-        onFormatChanged: (format) {
-          if (_calendarFormat != format) {
-            setState(() {
-              _calendarFormat = format;
-            });
-          }
-        },
-        onPageChanged: (focusedDay) {
-          _focusedDay = focusedDay;
-        },
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+            },
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+          ),
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildWeekView() {
-    final weekStart = _focusedDay.subtract(Duration(days: _focusedDay.weekday - 1));
-    final weekDays = List.generate(7, (index) => weekStart.add(Duration(days: index)));
-    
+    final weekStart = _focusedDay.subtract(
+      Duration(days: _focusedDay.weekday - 1),
+    );
+    final weekDays = List.generate(
+      7,
+      (index) => weekStart.add(Duration(days: index)),
+    );
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Week Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Week of ${DateFormat('MMM d').format(weekStart)}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimaryColor,
+            ],
+          ),
+          child: Column(
+            children: [
+              // Week Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
                 ),
-                Row(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _focusedDay = _focusedDay.subtract(const Duration(days: 7));
-                        });
-                      },
-                      icon: Icon(Icons.chevron_left, color: AppTheme.primaryColor),
+                    Text(
+                      'Week of ${DateFormat('MMM d').format(weekStart)}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimaryColor,
+                      ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _focusedDay = _focusedDay.add(const Duration(days: 7));
-                        });
-                      },
-                      icon: Icon(Icons.chevron_right, color: AppTheme.primaryColor),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _focusedDay = _focusedDay.subtract(
+                                const Duration(days: 7),
+                              );
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_left,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _focusedDay = _focusedDay.add(
+                                const Duration(days: 7),
+                              );
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_right,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          
-          // Week Days
-          Expanded(
-            child: ListView.builder(
-              itemCount: weekDays.length,
-              itemBuilder: (context, index) {
-                final day = weekDays[index];
-                final isToday = isSameDay(day, DateTime.now());
-                final isSelected = isSameDay(day, _selectedDay);
-                final events = _getEventsForDay(day);
-                
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedDay = day;
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      border: isToday ? Border.all(color: AppTheme.primaryColor, width: 2) : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          child: Column(
-                            children: [
-                              Text(
-                                DateFormat('E').format(day),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected ? AppTheme.primaryColor : AppTheme.textSecondaryColor,
-                                ),
-                              ),
-                              Text(
-                                day.day.toString(),
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? AppTheme.primaryColor : AppTheme.textPrimaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
+              ),
+
+              // Week Days
+              Expanded(
+                child: ListView.builder(
+                  itemCount: weekDays.length,
+                  itemBuilder: (context, index) {
+                    final day = weekDays[index];
+                    final isToday = isSameDay(day, DateTime.now());
+                    final isSelected = isSameDay(day, _selectedDay);
+                    final events = _getEventsForDay(day);
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedDay = day;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (events.isNotEmpty)
-                                ...events.map((event) => _buildEventChip(event, day))
-                              else
-                                Text(
-                                  'No classes scheduled',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppTheme.textHintColor,
-                                    fontStyle: FontStyle.italic,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppTheme.primaryColor.withOpacity(0.1)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          border: isToday
+                              ? Border.all(
+                                  color: AppTheme.primaryColor,
+                                  width: 2,
+                                )
+                              : null,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    DateFormat('E').format(day),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSelected
+                                          ? AppTheme.primaryColor
+                                          : AppTheme.textSecondaryColor,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        if (events.isNotEmpty)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: AppTheme.accentColor,
-                              shape: BoxShape.circle,
+                                  Text(
+                                    day.day.toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected
+                                          ? AppTheme.primaryColor
+                                          : AppTheme.textPrimaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (events.isNotEmpty)
+                                    ...events.map(
+                                      (event) => _buildEventChip(event, day),
+                                    )
+                                  else
+                                    Text(
+                                      'No classes scheduled',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppTheme.textHintColor,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            if (events.isNotEmpty)
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.accentColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildDayView() {
     final selectedDate = _selectedDay ?? DateTime.now();
     final events = _getEventsForDay(selectedDate);
-    
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Day Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat('EEEE').format(selectedDate),
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimaryColor,
-                      ),
-                    ),
-                    Text(
-                      DateFormat('MMMM d, y').format(selectedDate),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedDay = selectedDate.subtract(const Duration(days: 1));
-                        });
-                      },
-                      icon: Icon(Icons.chevron_left, color: AppTheme.primaryColor),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedDay = selectedDate.add(const Duration(days: 1));
-                        });
-                      },
-                      icon: Icon(Icons.chevron_right, color: AppTheme.primaryColor),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            ],
           ),
-          
-          // Day Events
-          Expanded(
-            child: events.isEmpty
-                ? _buildEmptyDayState()
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: events.length,
-                    itemBuilder: (context, index) {
-                      final event = events[index];
-                      return _buildEventCard(event, selectedDate);
-                    },
+          child: Column(
+            children: [
+              // Day Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DateFormat('EEEE').format(selectedDate),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimaryColor,
+                          ),
+                        ),
+                        Text(
+                          DateFormat('MMMM d, y').format(selectedDate),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppTheme.textSecondaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedDay = selectedDate.subtract(
+                                const Duration(days: 1),
+                              );
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_left,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedDay = selectedDate.add(
+                                const Duration(days: 1),
+                              );
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_right,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Day Events
+              Expanded(
+                child: events.isEmpty
+                    ? _buildEmptyDayState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: events.length,
+                        itemBuilder: (context, index) {
+                          final event = events[index];
+                          return _buildEventCard(event, selectedDate);
+                        },
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: const Duration(milliseconds: 600)).slideY(begin: 0.3);
+        )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 600))
+        .slideY(begin: 0.3);
   }
 
   Widget _buildEmptyDayState() {
@@ -487,11 +538,7 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 80,
-            color: Colors.grey.withOpacity(0.4),
-          ),
+          Icon(Icons.event_busy, size: 80, color: Colors.grey.withOpacity(0.4)),
           const SizedBox(height: 16),
           Text(
             'No classes scheduled',
@@ -504,10 +551,7 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
           const SizedBox(height: 8),
           Text(
             'Enjoy your free day!',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textHintColor,
-            ),
+            style: TextStyle(fontSize: 14, color: AppTheme.textHintColor),
           ),
         ],
       ),
@@ -600,7 +644,7 @@ class _StudentCalendarPageState extends ConsumerState<StudentCalendarPage> {
       DateTime(2024, 12, 19): ['Software Engineering'],
       DateTime(2024, 12, 20): ['Mathematics', 'Computer Networks'],
     };
-    
+
     return mockEvents[DateTime(day.year, day.month, day.day)] ?? [];
   }
 }

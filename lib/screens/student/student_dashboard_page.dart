@@ -6,6 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user.dart' as app_user;
+import '../../models/dashboard_summary.dart';
+import '../../controllers/student_dashboard_controller.dart';
 import '../../widgets/offline_badge.dart';
 
 class StudentDashboardPage extends ConsumerStatefulWidget {
@@ -210,13 +212,27 @@ class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage>
   }
 
   Widget _buildStatsRow() {
+    final summaryAsync = ref.watch(studentDashboardControllerProvider);
+    final summary = summaryAsync.value;
     return Row(
       children: [
-        _buildStatItem('Attendance', '85%', AppTheme.presentColor),
+        _buildStatItem(
+          'Attendance',
+          summary?.attendanceLabel ?? '—',
+          AppTheme.presentColor,
+        ),
         const SizedBox(width: 20),
-        _buildStatItem('Goals', '3/5', AppTheme.accentColor),
+        _buildStatItem(
+          'Goals',
+          summary?.goalsLabel ?? '—',
+          AppTheme.accentColor,
+        ),
         const SizedBox(width: 20),
-        _buildStatItem('Streak', '7 days', AppTheme.secondaryColor),
+        _buildStatItem(
+          'Streak',
+          summary?.streakLabel ?? '—',
+          AppTheme.secondaryColor,
+        ),
       ],
     );
   }
@@ -410,6 +426,16 @@ class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage>
   }
 
   Widget _buildTodaySchedule() {
+    final summaryAsync = ref.watch(studentDashboardControllerProvider);
+    final slots = summaryAsync.value?.todaySlots ?? [];
+
+    final colors = [
+      AppTheme.primaryColor,
+      AppTheme.secondaryColor,
+      AppTheme.accentColor,
+      AppTheme.presentColor,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -435,30 +461,24 @@ class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage>
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildScheduleItem(
-                'Mathematics',
-                '09:00 AM',
-                'Room 101',
-                AppTheme.primaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildScheduleItem(
-                'Physics',
-                '10:30 AM',
-                'Room 102',
-                AppTheme.secondaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildScheduleItem(
-                'Chemistry',
-                '02:00 PM',
-                'Room 103',
-                AppTheme.accentColor,
-              ),
-            ],
-          ),
+          child: slots.isEmpty
+              ? const Text(
+                  'No classes scheduled today',
+                  style: TextStyle(color: AppTheme.textSecondaryColor),
+                )
+              : Column(
+                  children: [
+                    for (int i = 0; i < slots.length; i++) ...[
+                      _buildScheduleItem(
+                        slots[i].subject,
+                        slots[i].timeRange,
+                        slots[i].room,
+                        colors[i % colors.length],
+                      ),
+                      if (i < slots.length - 1) const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
         ),
       ],
     );
@@ -523,6 +543,15 @@ class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage>
   }
 
   Widget _buildGoalsProgress() {
+    final summaryAsync = ref.watch(studentDashboardControllerProvider);
+    final goals = summaryAsync.value?.goalsProgress ?? {};
+
+    final goalColors = [
+      AppTheme.primaryColor,
+      AppTheme.secondaryColor,
+      AppTheme.accentColor,
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -548,27 +577,23 @@ class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage>
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildGoalItem(
-                'Complete Math Assignment',
-                0.8,
-                AppTheme.primaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildGoalItem(
-                'Read Physics Chapter 5',
-                0.6,
-                AppTheme.secondaryColor,
-              ),
-              const SizedBox(height: 12),
-              _buildGoalItem(
-                'Practice Chemistry Problems',
-                0.3,
-                AppTheme.accentColor,
-              ),
-            ],
-          ),
+          child: goals.isEmpty
+              ? const Text(
+                  'No active goals',
+                  style: TextStyle(color: AppTheme.textSecondaryColor),
+                )
+              : Column(
+                  children: [
+                    for (int i = 0; i < goals.entries.length; i++) ...[
+                      _buildGoalItem(
+                        goals.keys.elementAt(i),
+                        goals.values.elementAt(i),
+                        goalColors[i % goalColors.length],
+                      ),
+                      if (i < goals.length - 1) const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
         ),
       ],
     );
