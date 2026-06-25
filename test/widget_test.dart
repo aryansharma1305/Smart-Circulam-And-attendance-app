@@ -1,30 +1,57 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:management_app/core/router.dart';
 import 'package:management_app/main.dart';
+import 'package:management_app/providers/repository_providers.dart';
+import 'package:management_app/repositories/in_memory/in_memory_auth_repository.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const SmartStudyApp());
+  late ProviderContainer container;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(InMemoryAuthRepository()),
+      ],
+    );
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  tearDown(() => container.dispose());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  Future<void> pumpApp(WidgetTester tester) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const SmartStudyApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('app starts on onboarding and opens supported role selection', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    expect(find.text('Welcome to SmartStudy+'), findsOneWidget);
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('I am a...'), findsOneWidget);
+    expect(find.text('Student'), findsOneWidget);
+    expect(find.text('Teacher'), findsOneWidget);
+    expect(find.text('Admin'), findsOneWidget);
+    expect(find.text('Counselor'), findsNothing);
+  });
+
+  testWidgets('protected student route redirects an unauthenticated user', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    container.read(routerProvider).go('/student');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome to SmartStudy+'), findsOneWidget);
   });
 }
