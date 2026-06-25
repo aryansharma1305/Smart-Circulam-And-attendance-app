@@ -1,11 +1,22 @@
-import 'dart:convert';
 import 'dart:math';
+
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 
+import 'secure_qr_service.dart';
+
 class QRService {
-  static const String _secretKey = 'SmartStudy+SecretKey2024';
+  // Local/dev fallback only. In production, QR signing must happen in a trusted
+  // backend using a secret that is never shipped in the Flutter client.
+  static const String _secretKey = String.fromEnvironment(
+    'QR_SIGNING_SECRET',
+    defaultValue: 'dev-only-qr-signing-secret-change-before-production',
+  );
   static const int _qrValiditySeconds = 30;
+  static final SecureQrService _secureQrService = SecureQrService(
+    signingSecret: _secretKey,
+    tokenTtl: const Duration(seconds: _qrValiditySeconds),
+  );
 
   /// Generate a simple demo QR code for attendance session
   static Future<QRCodeData> generateAttendanceQR({
@@ -17,24 +28,12 @@ class QRService {
     required String wifiSSID,
     required DateTime timestamp,
   }) async {
-    // Create simple QR payload (demo version without encryption)
-    final payload = {
-      'sessionId': sessionId,
-      'classId': classId,
-      'teacherId': teacherId,
-      'latitude': latitude,
-      'longitude': longitude,
-      'wifiSSID': wifiSSID,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-      'demoCode': _generateDemoCode(),
-      'expiresAt': timestamp
-          .add(Duration(seconds: _qrValiditySeconds))
-          .millisecondsSinceEpoch,
-    };
-
-    // Simple base64 encoding (demo version)
-    final jsonString = jsonEncode(payload);
-    final encodedPayload = base64Encode(utf8.encode(jsonString));
+    final encodedPayload = _secureQrService.issueToken(
+      sessionId: sessionId,
+      timetableEntryId: classId,
+      teacherId: teacherId,
+      issuedAt: timestamp,
+    );
 
     final qrData = QRCodeData(
       data: encodedPayload,
@@ -55,61 +54,31 @@ class QRService {
     required String deviceId,
   }) async {
     try {
-      // Decode the payload (demo version)
-      final payload = _decodePayload(scannedData);
+      final validation = _secureQrService.verifyToken(
+        rawToken: scannedData,
+        expectedSessionId: expectedSessionId,
+      );
 
-      if (payload == null) {
+      if (!validation.isValid || validation.token == null) {
         return QRValidationResult(
           isValid: false,
-          error: 'Invalid QR code format',
+          error: validation.error ?? 'Invalid QR code',
         );
       }
 
-      // Check if QR is expired
-      final expiresAt = DateTime.fromMillisecondsSinceEpoch(
-        payload['expiresAt'],
-      );
-      if (DateTime.now().isAfter(expiresAt)) {
-        return QRValidationResult(isValid: false, error: 'QR code has expired');
-      }
-
-      // Validate session ID if provided
-      if (expectedSessionId != null && expectedSessionId.isNotEmpty) {
-        if (payload['sessionId'] != expectedSessionId) {
-          return QRValidationResult(isValid: false, error: 'Invalid session');
-        }
-      }
-
-      // Demo validation - always pass for demo purposes
+      final token = validation.token!;
       return QRValidationResult(
         isValid: true,
-        sessionId: payload['sessionId'],
-        classId: payload['classId'],
-        teacherId: payload['teacherId'],
-        timestamp: DateTime.fromMillisecondsSinceEpoch(payload['timestamp']),
+        sessionId: token.sessionId,
+        classId: token.timetableEntryId,
+        teacherId: token.teacherId,
+        timestamp: token.issuedAt,
       );
     } catch (e) {
       return QRValidationResult(
         isValid: false,
         error: 'QR validation failed: ${e.toString()}',
       );
-    }
-  }
-
-  /// Generate demo code (replaces TOTP)
-  static String _generateDemoCode() {
-    final random = Random();
-    return (100000 + random.nextInt(900000)).toString();
-  }
-
-  /// Decode payload from QR code (demo version)
-  static Map<String, dynamic>? _decodePayload(String encodedData) {
-    try {
-      final decodedBytes = base64Decode(encodedData);
-      final jsonString = utf8.decode(decodedBytes);
-      return jsonDecode(jsonString) as Map<String, dynamic>;
-    } catch (e) {
-      return null;
     }
   }
 
